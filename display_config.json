@@ -1,0 +1,218 @@
+{
+ "config": {
+  "enabled": true,
+  "backlight": true,
+  "fps": 8,
+  "scroll_ms": 350,
+  "bar_style": "blocks",
+  "water_pump": 9,
+  "page_seconds": 4,
+  "cat": {
+   "enabled": true,
+   "side": "right",
+   "name": "Mochi",
+   "whiskers": true,
+   "auto": false,
+   "manual_mood": "excited",
+   "speed": 1,
+   "blink_min": 2,
+   "blink_max": 6
+  },
+  "moods": {
+   "boot": "love",
+   "pouring": "excited",
+   "done": "happy",
+   "empty": "exhausted",
+   "low": "sad",
+   "tired": "exhausted",
+   "sleep": "sleepy",
+   "idle": "neutral",
+   "error": "surprised"
+  },
+  "rules": {
+   "done_hold_s": 6,
+   "low_pct": 20,
+   "empty_pct": 5,
+   "tired_pours": 15,
+   "sleep_after_s": 120
+  },
+  "tanks": {
+   "1": {
+    "enabled": true,
+    "name": "Flavor 1",
+    "capacity": 500,
+    "level": 0.0,
+    "flow": 25,
+    "low": 20
+   },
+   "2": {
+    "enabled": true,
+    "name": "Flavor 2",
+    "capacity": 500,
+    "level": 360.18746852874756,
+    "flow": 25,
+    "low": 20
+   },
+   "3": {
+    "enabled": true,
+    "name": "Flavor 3",
+    "capacity": 500,
+    "level": 20.680360794067383,
+    "flow": 25,
+    "low": 20
+   },
+   "4": {
+    "enabled": true,
+    "name": "Flavor 4",
+    "capacity": 500,
+    "level": 340.7859420776367,
+    "flow": 25,
+    "low": 20
+   },
+   "5": {
+    "enabled": true,
+    "name": "Flavor 5",
+    "capacity": 500,
+    "level": 197.37573623657227,
+    "flow": 25,
+    "low": 20
+   },
+   "6": {
+    "enabled": true,
+    "name": "Flavor 6",
+    "capacity": 500,
+    "level": 479.1217041015625,
+    "flow": 25,
+    "low": 20
+   },
+   "7": {
+    "enabled": true,
+    "name": "Flavor 7",
+    "capacity": 500,
+    "level": 479.3347644805908,
+    "flow": 25,
+    "low": 20
+   },
+   "8": {
+    "enabled": true,
+    "name": "Flavor 8",
+    "capacity": 500,
+    "level": 356.0780906677246,
+    "flow": 25,
+    "low": 20
+   },
+   "9": {
+    "enabled": true,
+    "name": "Sparkling",
+    "capacity": 1000,
+    "level": 0.0,
+    "flow": 25,
+    "low": 20
+   }
+  },
+  "pages": [
+   {
+    "dur": 4,
+    "l1": {
+     "align": "c",
+     "scroll": false,
+     "text": "Water {water}%"
+    },
+    "l2": {
+     "align": "l",
+     "scroll": false,
+     "text": "{bar:water:12}"
+    },
+    "name": "Water",
+    "on": true,
+    "when": "idle"
+   },
+   {
+    "dur": 4,
+    "l1": {
+     "align": "l",
+     "scroll": false,
+     "text": "Pours {pours}"
+    },
+    "l2": {
+     "align": "l",
+     "scroll": false,
+     "text": "Today {ml_today}ml"
+    },
+    "name": "Pours",
+    "on": true,
+    "when": "idle"
+   },
+   {
+    "dur": 3,
+    "l1": {
+     "align": "c",
+     "scroll": false,
+     "text": "{time}"
+    },
+    "l2": {
+     "align": "c",
+     "scroll": false,
+     "text": "{date}"
+    },
+    "name": "Clock",
+    "on": true,
+    "when": "idle"
+   },
+   {
+    "dur": 4,
+    "l1": {
+     "align": "c",
+     "scroll": false,
+     "text": "Pouring..."
+    },
+    "l2": {
+     "align": "c",
+     "scroll": false,
+     "text": "{pour_s}s {active}p"
+    },
+    "name": "Pouring",
+    "on": true,
+    "when": "pouring"
+   },
+   {
+    "dur": 4,
+    "l1": {
+     "align": "l",
+     "scroll": true,
+     "text": "Low: {lowest}"
+    },
+    "l2": {
+     "align": "l",
+     "scroll": false,
+     "text": "{lowest_pct}% left"
+    },
+    "name": "Low",
+    "on": true,
+    "when": "low"
+   },
+   {
+    "dur": 4,
+    "l1": {
+     "align": "c",
+     "scroll": false,
+     "text": "No Arduino"
+    },
+    "l2": {
+     "align": "c",
+     "scroll": false,
+     "text": "check USB"
+    },
+    "name": "Error",
+    "on": true,
+    "when": "error"
+   }
+  ]
+ },
+ "stats": {
+  "date": "2026-10-04",
+  "pours_today": 5,
+  "ml_today": 2009.9613499641418,
+  "total": 20
+ }
+}

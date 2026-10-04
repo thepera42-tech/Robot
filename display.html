@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Display settings</title>
+<style>
+:root{--bg:#12141a;--card:#1b1e27;--line:#2b3040;--tx:#e8eaf0;--mut:#8b92a6;--ac:#5aa9ff}
+@media(prefers-color-scheme:light){:root{--bg:#f2f4f8;--card:#fff;--line:#d9dde7;--tx:#1b1e27;--mut:#5d6578;--ac:#1f6fd1}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px system-ui,sans-serif}
+main{max-width:1100px;margin:auto;padding:16px}h1{font-size:20px;margin:4px 0 12px}
+h2{font-size:14px;margin:0 0 10px;color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.r{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0}
+.r span{color:var(--mut)}input,select,button{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+input[type=text],input[type=number]{width:150px}input[type=checkbox]{width:18px;height:18px}
+button{cursor:pointer}button:hover{border-color:var(--ac)}
+#lcdwrap{background:#0b2a6b;border-radius:10px;padding:12px;border:4px solid #222;max-width:640px;margin:auto}
+canvas{width:100%;display:block;image-rendering:pixelated}
+.zone{display:flex;max-width:640px;margin:4px auto 0;font-size:11px;color:var(--mut)}.zone div{text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chips button{padding:3px 8px;font-size:12px}
+.pg{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
+table{width:100%;border-collapse:collapse}td{padding:3px}td input[type=text],td input[type=number]{width:80px}
+.pill{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}
+</style></head><body><main>
+<h1>LCD display <span class="pill" id="hw">…</span> <span class="pill" id="info"></span></h1>
+
+<div class="card">
+  <div id="lcdwrap"><canvas id="lcd" width="576" height="108"></canvas></div>
+  <div class="zone" id="zone"></div>
+  <div class="chips" id="moodbtn" style="justify-content:center"></div>
+</div>
+
+<div class="grid">
+  <div class="card" id="secGeneral"></div>
+  <div class="card" id="secCat"></div>
+  <div class="card" id="secMood"></div>
+  <div class="card" id="secRules"></div>
+</div>
+
+<div class="card"><h2>Tanks (water level and stats)</h2>
+  <p style="color:var(--mut);margin-top:0">Level drops automatically from pump run time × speed × flow rate. Measure each pump's ml/second at 100% and enter it as Flow.</p>
+  <table id="tanks"></table>
+  <div class="r"><button id="refillAll">Refill all</button><button id="resetStats">Reset pour counters</button></div>
+</div>
+
+<div class="card"><h2>Stats pages</h2>
+  <p style="color:var(--mut);margin-top:0">Each page is 2 lines, 12 characters wide. Click a token to insert it into the last text box.</p>
+  <div class="chips" id="tokens"></div>
+  <div id="pages"></div><button id="addPage">+ Add page</button>
+</div>
+</main>
+<script>
+const $=s=>document.querySelector(s);let C=null,focus=null,timer=null;
+const MOODS=["neutral","happy","sad","exhausted","sleepy","excited","surprised","love"];
+const TOK=["cat","mood","status","water","water_ml","pours","total","ml_today","time","date","active","pour_s","lowest","lowest_pct","lvl:1","ml:1","name:1","bar:water:12","bar:1:12"];
+const FONT="0000000000 00005f0000 0007000700 147f147f14 242a7f2a12 2313086462 3649552250 0005030000 001c224100 0041221c00 14083e0814 08083e0808 0050300000 0808080808 0060600000 2010080402 3e5149453e 00427f4000 4261514946 2141454b31 1814127f10 2745454539 3c4a494930 0171090503 3649494936 064949291e 0036360000 0056360000 0814224100 1414141414 0041221408 0201510906 324979413e 7e1111117e 7f49494936 3e41414122 7f4141221c 7f49494941 7f09090901 3e4149497a 7f0808087f 00417f4100 2040413f01 7f08142241 7f40404040 7f020c027f 7f0408107f 3e4141413e 7f09090906 3e4151215e 7f09192946 4649494931 01017f0101 3f4040403f 1f2040201f 3f4038403f 6314081463 0708700807 6151494543 007f414100 0204081020 0041417f00 0402010204 4040404040 0001020400 2054545478 7f48444438 3844444420 384444487f 3854545418 087e090102 0c5252523e 7f08040478 00447d4000 2040443d00 7f10284400 00417f4000 7c04180478 7c08040478 3844444438 7c14141408 081414187c 7c08040408 4854545420 043f444020 3c4040207c 1c2040201c 3c4030403c 4428102844 0c5050503c 4464544c44 0008364100 00007f0000 0041360800 1008081008".split(" ").map(h=>[0,2,4,6,8].map(i=>parseInt(h.substr(i,2),16)));
+const get=(o,p)=>p.split('.').reduce((a,k)=>a?.[k],o);
+const set=(o,p,v)=>{const k=p.split('.');let a=o;while(k.length>1)a=a[k.shift()];a[k[0]]=v};
+const esc=v=>String(v??'').replace(/"/g,'&quot;');
+function F(p,l,t='text',o=[]){const v=get(C,p);
+ if(t=='check')return `<label class=r><span>${l}</span><input type=checkbox data-k="${p}" ${v?'checked':''}></label>`;
+ if(t=='select')return `<label class=r><span>${l}</span><select data-k="${p}">${o.map(x=>`<option ${x==v?'selected':''}>${x}</option>`).join('')}</select></label>`;
+ return `<label class=r><span>${l}</span><input data-k="${p}" type="${t}" step="any" value="${esc(v)}"></label>`}
+function save(){clearTimeout(timer);timer=setTimeout(()=>fetch('/display/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(C)}),350)}
+function act(o){return fetch('/display/api/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)})}
+
+function render(){
+ $('#secGeneral').innerHTML='<h2>General</h2>'+F('enabled','Display on','check')+F('backlight','Backlight','check')+
+  F('fps','Refresh rate (fps, 1-8)','number')+F('bar_style','Bar style','select',['blocks','hash','eq'])+
+  F('scroll_ms','Scroll speed (ms/char)','number')+F('water_pump','Water tank pump #','number')+F('page_seconds','Default page time (s)','number');
+ $('#secCat').innerHTML='<h2>Cat (1 of 4 columns, left 1:3 layout)</h2>'+F('cat.enabled','Show cat','check')+
+  F('cat.side','Cat side','select',['left','right'])+F('cat.name','Cat name (token {cat})')+F('cat.whiskers','Whiskers','check')+
+  F('cat.speed','Animation speed','number')+F('cat.blink_min','Blink min (s)','number')+F('cat.blink_max','Blink max (s)','number')+
+  F('cat.auto','Automatic mood','check')+F('cat.manual_mood','Manual mood','select',MOODS);
+ $('#secMood').innerHTML='<h2>Which mood for which situation</h2>'+Object.keys(C.moods).map(k=>F('moods.'+k,k,'select',MOODS)).join('');
+ $('#secRules').innerHTML='<h2>Mood rules</h2>'+F('rules.done_hold_s','Happy after pour (s)','number')+F('rules.low_pct','Low water below (%)','number')+
+  F('rules.empty_pct','Empty below (%)','number')+F('rules.tired_pours','Tired after N pours today','number')+F('rules.sleep_after_s','Sleep after idle (s)','number');
+ $('#tanks').innerHTML='<tr><td></td><td>Name</td><td>Capacity ml</td><td>Flow ml/s</td><td>Low %</td><td>Level</td><td></td></tr>'+
+  Object.keys(C.tanks).map(i=>`<tr><td><input type=checkbox data-k="tanks.${i}.enabled" ${C.tanks[i].enabled?'checked':''}> ${i}</td>
+  <td><input type=text data-k="tanks.${i}.name" value="${esc(C.tanks[i].name)}"></td>
+  <td><input type=number data-k="tanks.${i}.capacity" value="${C.tanks[i].capacity}"></td>
+  <td><input type=number step=any data-k="tanks.${i}.flow" value="${C.tanks[i].flow}"></td>
+  <td><input type=number data-k="tanks.${i}.low" value="${C.tanks[i].low}"></td>
+  <td><b data-lv="${i}">-</b>%</td><td><button data-refill="${i}">Refill</button></td></tr>`).join('');
+ $('#pages').innerHTML=C.pages.map((p,i)=>`<div class=pg>
+  <div class=r>${F(`pages.${i}.on`,'On','check')}${F(`pages.${i}.name`,'Name')}</div>
+  <div class=r>${F(`pages.${i}.when`,'Show when','select',['idle','pouring','low','error','always'])}${F(`pages.${i}.dur`,'Seconds','number')}</div>
+  ${['l1','l2'].map(l=>`<div class=r><input type=text style="flex:1;width:auto" data-txt data-k="pages.${i}.${l}.text" value="${esc(p[l].text)}" placeholder="Line ${l[1]}">
+   <select data-k="pages.${i}.${l}.align">${['l','c','r'].map(a=>`<option ${a==p[l].align?'selected':''}>${a}</option>`).join('')}</select>
+   <label>scroll <input type=checkbox data-k="pages.${i}.${l}.scroll" ${p[l].scroll?'checked':''}></label></div>`).join('')}
+  <button data-del="${i}">Delete page</button></div>`).join('');
+ $('#moodbtn').innerHTML='<span class=pill>Preview mood:</span>'+MOODS.map(m=>`<button data-mood="${m}">${m}</button>`).join('')+'<button data-mood="auto">auto</button>';
+ $('#tokens').innerHTML=TOK.map(t=>`<button data-tok="{${t}}">{${t}}</button>`).join('');
+}
+document.addEventListener('input',e=>{const t=e.target;if(!t.dataset.k)return;
+ set(C,t.dataset.k,t.type=='checkbox'?t.checked:t.type=='number'?+t.value:t.value);save()});
+document.addEventListener('focusin',e=>{if(e.target.dataset.txt!==undefined)focus=e.target});
+document.addEventListener('click',e=>{const d=e.target.dataset;
+ if(d.tok&&focus){focus.value+=d.tok;set(C,focus.dataset.k,focus.value);save()}
+ if(d.del){C.pages.splice(+d.del,1);render();save()}
+ if(d.mood){C.cat.auto=d.mood=='auto';if(d.mood!='auto')C.cat.manual_mood=d.mood;render();save()}
+ if(d.refill)act({do:'refill',tank:d.refill});
+ if(e.target.id=='refillAll')act({do:'refill'});
+ if(e.target.id=='resetStats')act({do:'reset_stats'});
+ if(e.target.id=='addPage'){C.pages.push({name:'New',on:true,when:'idle',dur:4,l1:{text:'{cat} says hi',align:'c',scroll:false},l2:{text:'{time}',align:'c',scroll:false}});render();save()}});
+
+const cv=$('#lcd'),g=cv.getContext('2d');
+function glyph(code,cg){const r=[];
+ if(code<8)return cg[code]||Array(8).fill(0);
+ if(code==255)return Array(8).fill(31);
+ if(code>=32&&code<=126){const f=FONT[code-32];for(let y=0;y<8;y++){let v=0;for(let x=0;x<5;x++)if(y<7&&(f[x]>>y)&1)v|=1<<(4-x);r.push(v)}return r}
+ return Array(8).fill(0)}
+function draw(f){g.fillStyle='#2b6bff';g.fillRect(0,0,576,108);const P=6;
+ f.rows.forEach((row,ry)=>row.concat(Array(16).fill(32)).slice(0,16).forEach((c,cx)=>{const b=glyph(c,f.cgram);
+  for(let y=0;y<8;y++)for(let x=0;x<5;x++){g.fillStyle=(b[y]>>(4-x))&1?'#f4f8ff':'#2460e8';g.fillRect((cx*6+x)*6,(ry*9+y)*6,5,5)}}))}
+async function poll(){try{const f=await (await fetch('/display/api/frame')).json();if(f.rows){draw(f);
+ $('#hw').textContent=f.hw;$('#info').textContent='mood: '+f.mood+' · page: '+f.page;
+ document.querySelectorAll('[data-lv]').forEach(e=>e.textContent=f.levels[e.dataset.lv])}}catch(e){$('#hw').textContent='backend offline'}
+ setTimeout(poll,250)}
+(async()=>{const d=await (await fetch('/display/api/config')).json();C=d.config;render();poll();
+ const s=C.cat.side=='left';$('#zone').innerHTML=(C.cat.enabled?`<div style="width:25%;order:${s?0:1}">cat · 1</div><div style="width:75%">stats · 3</div>`:'<div style="width:100%">stats (full width)</div>')})();
+</script></body></html>
