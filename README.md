@@ -67,7 +67,9 @@ Developing without the Uno? Just `bash start.sh` (simulated).
 ## C. Friend's laptop (Windows / Mac / Linux)
 
 One-time: install Python (Windows: tick "Add Python to PATH"), then in this folder:
-`pip install -r requirements.txt`
+`python -m venv .venv` and install the base packages with `.venv/bin/python -m pip install -r requirements.txt` (Windows: `.venv\Scripts\python.exe -m pip install -r requirements.txt`). The launchers automatically use `.venv` or `venv` when present; otherwise they use the system Python.
+
+For local Kokoro speech, install its optional packages into that same environment: `.venv/bin/python -m pip install kokoro soundfile` (Windows: `.venv\Scripts\python.exe -m pip install kokoro soundfile`). On Linux, install the system `espeak-ng` package as well. Kokoro and its PyTorch dependencies are intentionally optional because they are substantially larger than the base backend dependencies.
 
 VIRTUAL ARDINO MODE: .\start.bat mock
 
@@ -79,24 +81,29 @@ Cheap Uno clones on Windows may need the **CH340 driver**.
 Want to open the kiosk on a different device (e.g. the TV) while the laptop runs the
 backend? Start with `PUMP_HOST=0.0.0.0` set, then browse to `http://<laptop-ip>:5005/`.
 
-## D. AI drink generation (Groq or OmniRoute + ElevenLabs)
+## D. Local conversation, reasoning, drinks, and voice
 
-Create API keys in the [Groq console](https://console.groq.com/keys), your OmniRoute dashboard, and [ElevenLabs](https://elevenlabs.io/app/settings/api-keys).
-Start the pump backend with `start.bat mock`, then choose a provider for chat and drink recipes separately in `Settings > System`.
-Enter the relevant API key there and press `Save providers`. Keys are sent to the backend, never stored in browser storage, and are never returned to the page. The OmniRoute key and provider choices persist in `%LOCALAPPDATA%\PumpKiosk\ai_settings.json` on Windows (or `~/.config/PumpKiosk/ai_settings.json` elsewhere); the Groq and ElevenLabs keys remain in backend memory and clear when it restarts.
+Pull the local conversation model once with `ollama pull qwen2.5:3b` and make sure Ollama is running at `http://127.0.0.1:11434`. In `Settings > System`, use **Casual conversation model (Ollama)** to choose any model Ollama has downloaded. Greetings and everyday chat always use this local model; those messages are not sent to Groq or OmniRoute. Up to eight recent casual turns are held in browser memory for conversational context and sent only to Ollama.
+
+Requests that need tools, code, math/workspace output, web research, or other complex reasoning use the selected **Complex request provider / Reasoning model**. Drink recipes use the independently selected recipe provider and model. The kiosk routes these categories separately; recipe generation remains validated by the backend before any pour. The local model list is loaded from Ollama when settings are opened or when **Pull available models** is pressed.
+
+Voice output can use **Kokoro-82M (local)** with a selectable Kokoro voice, or **ElevenLabs Flash (cloud)**. Kokoro is the default when its package is installed; otherwise the previous ElevenLabs default is retained. Install Kokoro in the same Python environment that runs the backend with `pip install kokoro soundfile` (and install `espeak-ng` with your OS package manager if it is not already present). Kokoro may download its voice/model weights on the first synthesis. Select ElevenLabs and configure its API key if you prefer cloud speech.
+
+Typed casual replies, voice requests, and spoken summaries of complex requests use the selected voice. With local Kokoro, Ollama streams the full answer while an isolated Kokoro worker loads the voice model in parallel. Kokoro receives the entire reply in one synthesis call, preserving context and intonation across sentences; playback starts when that utterance is synthesized. Kokoro's predicted word timings drive captions where available. The local Ollama model is kept warm for 15 minutes after use to avoid repeated model-load delays. Kokoro audio is piped in memory and does not create per-reply audio files. The three-second prefetch setting applies to cloud voice.
+
+For complex requests or cloud speech, create the relevant keys in the [Groq console](https://console.groq.com/keys), your OmniRoute dashboard, or [ElevenLabs](https://elevenlabs.io/app/settings/api-keys). Enter them in `Settings > System` and press `Save providers`. Keys are sent to the backend, never stored in browser storage, and never returned to the page. The OmniRoute key, provider selections, casual Ollama model, and voice selections persist in `%LOCALAPPDATA%\PumpKiosk\ai_settings.json` on Windows (or `~/.config/PumpKiosk/ai_settings.json` elsewhere); Groq and ElevenLabs keys remain in backend memory and clear when it restarts. Selected remote chat/recipe model IDs remain in this browser's kiosk settings.
 
 OmniRoute must be running locally at `http://localhost:20128`. The backend calls its OpenAI-compatible API at `http://localhost:20128/v1`; use the OmniRoute combo/model IDs shown in its dashboard. Each task can use a different provider and model.
 
-Groq's `openai/gpt-oss-120b` model handles recipe reasoning; `openai/gpt-oss-20b` handles Coda's conversational text.
-ElevenLabs `eleven_flash_v2_5` generates streamed audio and character timings for captions synchronized to the voice.
-The default voice ID can be changed in `Settings > System`. Groq quotas vary by account; check the Groq limits page.
+Groq's `openai/gpt-oss-120b` model is the default recipe reasoner; `openai/gpt-oss-20b` is the default complex-request model.
+ElevenLabs `eleven_flash_v2_5` generates streamed audio and character timings for synchronized captions. Its voice ID can be changed in `Settings > System`. Groq quotas vary by account; check the Groq limits page.
 ElevenLabs currently lists 10,000 free credits per month, with text-to-speech charged per character.
 
 Groq requests use system proxy settings by default. If a proxy is blocking them, set `GROQ_PROXY=direct` before
 starting the backend to bypass environment proxies, or set `GROQ_PROXY=http://host:port` to use a specific proxy.
 On Windows, run `set GROQ_PROXY=direct` in the same Command Prompt before `start.bat mock`.
 
-`TALK` uses browser speech recognition for input. Replies use ElevenLabs audio, with captions following its timing data.
+`TALK` uses browser speech recognition for input. Replies use the selected local or cloud voice; Kokoro audio uses end-of-response captions, while ElevenLabs captions follow its timing data.
 Voice input still requires browser support and microphone permission. Recipes use at most three ingredients, 12 seconds
 per pump, and 24 total pump-seconds; the proposed recipe must be explicitly confirmed before any pour. Exact density
 requires calibrated pump flow and ingredient density data, which are not currently configured.
@@ -131,3 +138,34 @@ requires calibrated pump flow and ingredient density data, which are not current
 4. Layout is 1:3: 4 columns cat, 12 columns stats. Tank levels drop from pump run time x speed x flow (ml/s), so enter each pump's real flow.
 
 Files: `display.py` (logic + routes), `display.html` (settings page), `pump_controller_uno_lcd.ino` (Arduino).
+
+## Robot workspace, music and agent browser
+
+When a drink is ordered the face shrinks and a **dock** (Workspace / Music / Browser) opens under it, beside the
+recipe card. The **TOOLS** button opens it any time. Everything the robot says now goes through a tool-using agent
+(`/agent/chat`), so voice or typed requests like these just work:
+
+- "Play Shape of You" -> searches YouTube, plays it in the Music tab.  "Raise the volume" / "set it to 30" / "mute".
+  Music ducks automatically while the robot talks or listens.
+- "Graph sin x and x squared", "simulate a ball bouncing in 3D", "draw a circuit...", "coach me through this equation",
+  "make a table of..." -> rendered in the Workspace tab by the full AURA engine (`aura.html`, also at `/aura`).
+- "Look up ...", "open example.com", "download <url>" -> agent browser.
+
+### Agent browser engines
+| | lite (default, runs on the TV/Termux) | full (laptop/PC) |
+|---|---|---|
+| search / read pages / download files | yes | yes |
+| live view, click, type, scroll, tabs | no | yes (real Chromium) |
+
+Full engine: `pip install playwright && playwright install chromium`, then it is picked automatically.
+TV + laptop: on the laptop run `BROWSER_HOST=0.0.0.0 BROWSER_TOKEN=secret python agent_browser.py`; on the TV set
+`BROWSER_REMOTE=http://<laptop-ip>:5006 BROWSER_TOKEN=secret` before starting the backend. Downloads then land on the laptop.
+The browser refuses private/LAN addresses unless `BROWSER_ALLOW_PRIVATE=1`.
+
+### Volume
+The YouTube player volume always works. Real device volume is used when available: Termux (`pkg install termux-api`),
+Linux (`pactl`/`amixer`), macOS, Windows (`pip install pycaw`).
+
+### Kiosk tips
+Start Chrome with `--autoplay-policy=no-user-gesture-required` so music can start without a touch (otherwise a
+"Tap to start" button appears). The dock needs internet for YouTube and for AURA's CDN libraries (Chart.js, KaTeX, Pyodide).

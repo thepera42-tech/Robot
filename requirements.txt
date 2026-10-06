@@ -1,3 +1,8 @@
 flask
 flask-cors
 pyserial
+
+# --- optional: full agent browser (real Chromium; laptop/PC only, not Termux) ---
+# playwright
+# --- optional: real device volume on Windows ---
+# pycaw

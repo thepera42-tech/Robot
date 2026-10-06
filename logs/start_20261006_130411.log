@@ -1,0 +1,163 @@
+[13:04:11] Transport mode: serial
+[13:04:11] Backend started (PID 18483)
+[13:04:11] Waiting for the backend to respond...
+2026-10-06 13:04:12,040 [INFO] Loaded Groq API key from the portable application folder.
+2026-10-06 13:04:12,040 [INFO] Loaded ElevenLabs API key from the portable application folder.
+2026-10-06 13:04:12,049 [INFO] LCD display controller ready: /display
+2026-10-06 13:04:12,071 [INFO] Agent browser: engine=lite
+2026-10-06 13:04:12,072 [INFO] Starting pump backend on http://127.0.0.1:5005  (transport: serial)
+ * Serving Flask app 'backend'
+ * Debug mode: off
+2026-10-06 13:04:12,074 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2026-10-06 13:04:12,074 [INFO] [33mPress CTRL+C to quit[0m
+2026-10-06 13:04:14,057 [INFO] Arduino link up: Serial port /dev/ttyUSB0
+2026-10-06 13:04:14,058 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:14] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:14,058 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:14] "GET /hardware HTTP/1.1" 200 -
+[13:04:14] Backend is up.
+2026-10-06 13:04:14,068 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:14] "GET /hardware HTTP/1.1" 200 -
+  Arduino: CONNECTED  ->  Serial port /dev/ttyUSB0
+[13:04:14] Opening controller UI: http://localhost:5005/
+2026-10-06 13:04:14,264 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:14] "[36mGET / HTTP/1.1[0m" 304 -
+2026-10-06 13:04:14,348 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:14] "[36mGET /omni/omni.js HTTP/1.1[0m" 304 -
+2026-10-06 13:04:14,351 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:14] "[36mGET /omni/omni.css HTTP/1.1[0m" 304 -
+2026-10-06 13:04:14,411 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:14] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:14,447 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:14] "GET /system/volume HTTP/1.1" 200 -
+2026-10-06 13:04:15,378 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:15] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:16,058 [WARNING] display loop: no reply
+2026-10-06 13:04:17,939 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:17] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:17,940 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:17] "GET /status HTTP/1.1" 200 -
+2026-10-06 13:04:17,944 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:17] "GET /flow-status HTTP/1.1" 200 -
+2026-10-06 13:04:17,945 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:17] "GET /ai/status HTTP/1.1" 200 -
+2026-10-06 13:04:18,034 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:18] "GET /ai/models?task=casual HTTP/1.1" 200 -
+2026-10-06 13:04:18,410 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:18] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:19,184 [WARNING] display loop: no reply
+2026-10-06 13:04:19,375 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:19] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:22,310 [WARNING] display loop: no reply
+2026-10-06 13:04:22,346 [INFO] ARDUINO: OK
+2026-10-06 13:04:22,347 [INFO] SENT: FIRE 2 5000 80  -> REPLY: OK
+2026-10-06 13:04:22,348 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:22] "POST /fire HTTP/1.1" 200 -
+2026-10-06 13:04:22,411 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:22] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:23,373 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:23] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:24,972 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:24] "GET /ai/models?task=recipe HTTP/1.1" 200 -
+2026-10-06 13:04:24,972 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:24] "GET /ai/models?task=chat HTTP/1.1" 200 -
+2026-10-06 13:04:25,436 [WARNING] display loop: no reply
+2026-10-06 13:04:26,416 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:26] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:27,350 [INFO] ARDUINO: DONE 2
+2026-10-06 13:04:27,377 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:27] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:28,563 [WARNING] display loop: no reply
+2026-10-06 13:04:28,839 [INFO] ARDUINO: OK
+2026-10-06 13:04:28,839 [INFO] SENT: FIRE 2 5000 80  -> REPLY: OK
+2026-10-06 13:04:28,841 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:28] "POST /fire HTTP/1.1" 200 -
+2026-10-06 13:04:30,414 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:30] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:31,378 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:31] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:31,689 [WARNING] display loop: no reply
+2026-10-06 13:04:33,842 [INFO] ARDUINO: DONE 2
+2026-10-06 13:04:34,462 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:34] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:34,815 [WARNING] display loop: no reply
+2026-10-06 13:04:35,014 [INFO] ARDUINO: OK
+2026-10-06 13:04:35,015 [INFO] SENT: FIRE 3 5000 80  -> REPLY: OK
+2026-10-06 13:04:35,016 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:35] "POST /fire HTTP/1.1" 200 -
+2026-10-06 13:04:35,376 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:35] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:37,942 [WARNING] display loop: no reply
+2026-10-06 13:04:38,463 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:38] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:39,374 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:39] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:40,018 [INFO] ARDUINO: DONE 3
+2026-10-06 13:04:41,068 [WARNING] display loop: no reply
+2026-10-06 13:04:41,226 [INFO] ARDUINO: OK
+2026-10-06 13:04:41,227 [INFO] SENT: FIRE 2 5000 80  -> REPLY: OK
+2026-10-06 13:04:41,228 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:41] "POST /fire HTTP/1.1" 200 -
+2026-10-06 13:04:42,468 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:42] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:43,378 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:43] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:44,195 [WARNING] display loop: no reply
+2026-10-06 13:04:46,241 [INFO] ARDUINO: DONE 2
+2026-10-06 13:04:46,465 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:46] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:47,321 [WARNING] display loop: no reply
+2026-10-06 13:04:47,381 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:47] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:50,447 [WARNING] display loop: no reply
+2026-10-06 13:04:50,464 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:50] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:51,377 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:51] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:53,573 [WARNING] display loop: no reply
+2026-10-06 13:04:54,517 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:54] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:55,375 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:55] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:56,698 [WARNING] display loop: no reply
+2026-10-06 13:04:58,520 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:58] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:59,375 [INFO] 127.0.0.1 - - [06/Oct/2026 13:04:59] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:04:59,824 [WARNING] display loop: no reply
+2026-10-06 13:05:02,515 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:02] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:02,950 [WARNING] display loop: no reply
+2026-10-06 13:05:03,376 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:03] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:06,076 [WARNING] display loop: no reply
+2026-10-06 13:05:06,515 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:06] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:07,376 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:07] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:09,202 [WARNING] display loop: no reply
+2026-10-06 13:05:10,515 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:10] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:11,376 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:11] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:12,328 [WARNING] display loop: no reply
+2026-10-06 13:05:14,515 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:14] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:15,377 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:15] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:15,454 [WARNING] display loop: no reply
+2026-10-06 13:05:18,516 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:18] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:18,579 [WARNING] display loop: no reply
+2026-10-06 13:05:19,377 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:19] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:21,705 [WARNING] display loop: no reply
+2026-10-06 13:05:22,516 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:22] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:23,379 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:23] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:24,831 [WARNING] display loop: no reply
+2026-10-06 13:05:26,543 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:26] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:27,378 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:27] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:27,957 [WARNING] display loop: no reply
+2026-10-06 13:05:30,516 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:30] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:31,083 [WARNING] display loop: no reply
+2026-10-06 13:05:31,386 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:31] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:34,209 [WARNING] display loop: no reply
+2026-10-06 13:05:34,518 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:34] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:35,379 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:35] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:37,335 [WARNING] display loop: no reply
+2026-10-06 13:05:38,518 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:38] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:39,545 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:39] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:40,461 [WARNING] display loop: no reply
+2026-10-06 13:05:42,518 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:42] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:43,378 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:43] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:43,586 [WARNING] display loop: no reply
+2026-10-06 13:05:46,517 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:46] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:46,712 [WARNING] display loop: no reply
+2026-10-06 13:05:47,380 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:47] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:49,838 [WARNING] display loop: no reply
+2026-10-06 13:05:50,518 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:50] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:51,379 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:51] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:52,963 [WARNING] display loop: no reply
+2026-10-06 13:05:54,518 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:54] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:55,380 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:55] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:56,089 [WARNING] display loop: no reply
+2026-10-06 13:05:57,938 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:57] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:57,943 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:57] "GET /status HTTP/1.1" 200 -
+2026-10-06 13:05:57,944 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:57] "GET /flow-status HTTP/1.1" 200 -
+2026-10-06 13:05:57,945 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:57] "GET /ai/models?task=casual HTTP/1.1" 200 -
+2026-10-06 13:05:57,945 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:57] "GET /ai/status HTTP/1.1" 200 -
+2026-10-06 13:05:57,946 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:57] "GET /ai/models?task=chat HTTP/1.1" 200 -
+2026-10-06 13:05:57,947 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:57] "GET /ai/models?task=recipe HTTP/1.1" 200 -
+2026-10-06 13:05:58,527 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:58] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:05:59,216 [WARNING] display loop: no reply
+2026-10-06 13:05:59,380 [INFO] 127.0.0.1 - - [06/Oct/2026 13:05:59] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:06:02,341 [WARNING] display loop: no reply
+2026-10-06 13:06:02,389 [INFO] ARDUINO: ERR pump_off
+2026-10-06 13:06:02,389 [INFO] SENT: FIRE 1 5000 80  -> REPLY: ERR pump_off
+2026-10-06 13:06:02,390 [INFO] 127.0.0.1 - - [06/Oct/2026 13:06:02] "POST /fire HTTP/1.1" 200 -
+2026-10-06 13:06:02,524 [INFO] 127.0.0.1 - - [06/Oct/2026 13:06:02] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:06:03,387 [INFO] 127.0.0.1 - - [06/Oct/2026 13:06:03] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:06:05,468 [WARNING] display loop: no reply
+2026-10-06 13:06:05,506 [INFO] ARDUINO: OK
+2026-10-06 13:06:05,506 [INFO] SENT: FIRE 2 5000 80  -> REPLY: OK
+2026-10-06 13:06:05,506 [INFO] 127.0.0.1 - - [06/Oct/2026 13:06:05] "POST /fire HTTP/1.1" 200 -
+2026-10-06 13:06:06,520 [INFO] 127.0.0.1 - - [06/Oct/2026 13:06:06] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:06:07,384 [INFO] 127.0.0.1 - - [06/Oct/2026 13:06:07] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:06:08,595 [WARNING] display loop: no reply
+2026-10-06 13:06:10,510 [INFO] ARDUINO: DONE 2
+2026-10-06 13:06:10,526 [INFO] 127.0.0.1 - - [06/Oct/2026 13:06:10] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:06:11,382 [INFO] 127.0.0.1 - - [06/Oct/2026 13:06:11] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:06:11,722 [WARNING] display loop: no reply
+2026-10-06 13:06:14,525 [INFO] 127.0.0.1 - - [06/Oct/2026 13:06:14] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:06:14,848 [WARNING] display loop: no reply
+2026-10-06 13:06:15,558 [INFO] 127.0.0.1 - - [06/Oct/2026 13:06:15] "GET /hardware HTTP/1.1" 200 -
+[13:06:16] Stopping backend...

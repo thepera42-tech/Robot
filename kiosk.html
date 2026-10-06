@@ -219,6 +219,7 @@
     .pumpRow button{padding:5px 3px;font-size:10px;}
   }
 </style>
+<link rel="stylesheet" href="/omni/omni.css">
 </head>
 <body>
 
@@ -299,15 +300,18 @@
     </div>
 
     <div class="panelSection active" id="tab-system">
-      <p class="empty">Choose Groq or the local OmniRoute gateway separately for chat and drink recipes. ElevenLabs generates spoken voice.</p>
+      <p class="empty">Everyday conversation uses Ollama locally. Complex requests and drink recipes use the selected reasoning providers. Voice can be generated locally with Kokoro or with ElevenLabs.</p>
       <div class="systemGrid" id="diagnosticsList"><div class="empty">Checking system...</div></div>
       <h3>Current issues</h3>
       <div class="systemIssues" id="systemIssues" role="status" aria-live="polite"><div class="empty">Checking services...</div></div>
       <div class="modelPicker">
-        <label class="modelField" for="chatProviderSelect">Chat provider
+        <label class="modelField" for="casualModelSelect">Casual conversation model (Ollama)
+          <select id="casualModelSelect" aria-label="Casual conversation model"><option value="qwen2.5:3b">qwen2.5:3b</option></select>
+        </label>
+        <label class="modelField" for="chatProviderSelect">Complex request provider
           <select id="chatProviderSelect" aria-label="Chat provider"><option value="groq">Groq</option><option value="omniroute">OmniRoute</option></select>
         </label>
-        <label class="modelField" for="chatModelSelect">Chat model
+        <label class="modelField" for="chatModelSelect">Reasoning model
           <select id="chatModelSelect" aria-label="Chat model"><option>Loading models...</option></select>
         </label>
         <label class="modelField" for="recipeProviderSelect">Drink recipe provider
@@ -318,14 +322,40 @@
         </label>
         <button class="quietBtn" id="refreshModels" type="button">Pull available models</button>
       </div>
+      <div class="modelPicker">
+        <label class="modelField" for="voiceProviderSelect">Voice model
+          <select id="voiceProviderSelect" aria-label="Voice model">
+            <option value="kokoro">Kokoro-82M (local)</option>
+            <option value="elevenlabs">ElevenLabs Flash (cloud)</option>
+          </select>
+        </label>
+        <label class="modelField" for="kokoroVoiceSelect">Kokoro voice
+          <select id="kokoroVoiceSelect" aria-label="Kokoro voice">
+            <option value="af_heart">Heart · American female</option><option value="af_alloy">Alloy · American female</option>
+            <option value="af_aoede">Aoede · American female</option><option value="af_bella">Bella · American female</option>
+            <option value="af_jessica">Jessica · American female</option><option value="af_kore">Kore · American female</option>
+            <option value="af_nicole">Nicole · American female</option><option value="af_nova">Nova · American female</option>
+            <option value="af_river">River · American female</option><option value="af_sarah">Sarah · American female</option>
+            <option value="af_sky">Sky · American female</option><option value="am_adam">Adam · American male</option>
+            <option value="am_echo">Echo · American male</option><option value="am_eric">Eric · American male</option>
+            <option value="am_fenrir">Fenrir · American male</option><option value="am_liam">Liam · American male</option>
+            <option value="am_michael">Michael · American male</option><option value="am_onyx">Onyx · American male</option>
+            <option value="am_puck">Puck · American male</option><option value="am_santa">Santa · American male</option>
+            <option value="bf_alice">Alice · British female</option><option value="bf_emma">Emma · British female</option>
+            <option value="bf_isabella">Isabella · British female</option><option value="bf_lily">Lily · British female</option>
+            <option value="bm_daniel">Daniel · British male</option><option value="bm_fable">Fable · British male</option>
+            <option value="bm_george">George · British male</option><option value="bm_lewis">Lewis · British male</option>
+          </select>
+        </label>
+      </div>
       <div class="empty" id="modelsMsg" role="status" aria-live="polite"></div>
       <label class="settingRow" for="autoPourToggle">
         <input id="autoPourToggle" type="checkbox">
         <span>Auto-pour validated recipes after a 5-second interrupt window</span>
       </label>
-      <label class="modelField" for="captionSyncMode">Voice captions
+      <label class="modelField" for="captionSyncMode">Voice captions (local Kokoro starts immediately)
         <select id="captionSyncMode" aria-label="Voice caption timing">
-          <option value="buffered3">Prefetch 3 seconds, then play</option>
+          <option value="buffered3">Prefetch 3 seconds, then play (cloud voice)</option>
           <option value="stream">Stream immediately</option>
         </select>
       </label>
@@ -432,7 +462,7 @@
       pumps,
       personality:DEFAULT_PERSONALITY,
       autoPour:false,
-      captionSyncMode:'buffered3',
+      captionSyncMode:'stream',
       drinkOptions:{cupSize:'355',strength:'balanced',sparkling:'sparkling',flavor:''},
       memory:'',
       chatProvider:'groq',
@@ -447,6 +477,7 @@
   }
   let config = loadConfig();
   if(typeof config.autoPour !== 'boolean') config.autoPour = false;
+  if(!['kokoro','elevenlabs'].includes(config.voiceProvider)) config.voiceProvider = 'kokoro';
   if(!['buffered3','stream'].includes(config.captionSyncMode)) config.captionSyncMode = 'buffered3';
   if(!config.drinkOptions || typeof config.drinkOptions !== 'object') config.drinkOptions = {cupSize:'355',strength:'balanced',sparkling:'sparkling',flavor:''};
   if(!['250','355','473','custom'].includes(String(config.drinkOptions.cupSize))) config.drinkOptions.cupSize = '355';
@@ -486,6 +517,7 @@
     frame.classList.remove('mode-listening','mode-thinking','mode-speaking','mode-sleeping');
     if(mode !== 'idle') frame.classList.add('mode-'+mode);
     statePill.textContent = label || mode.toUpperCase();
+    if(window.Omni) window.Omni.onFaceMode(mode);
   }
   setMode('idle','IDLE');
 
@@ -851,7 +883,8 @@
     }
     if(ai && (ai.chat_provider === 'groq' || ai.recipe_provider === 'groq') && !ai.groq_api_key_set) issues.push(['Groq', 'API key is not set. Add it below in Settings.']);
     if(ai && (ai.chat_provider === 'omniroute' || ai.recipe_provider === 'omniroute') && !ai.omniroute_api_key_set) issues.push(['OmniRoute', 'API key is not set. Add it below in Settings.']);
-    if(ai && !ai.elevenlabs_api_key_set) issues.push(['ElevenLabs', 'API key is not set. Voice output will not work until it is configured.']);
+    if(ai && ai.voice_provider === 'elevenlabs' && !ai.elevenlabs_api_key_set) issues.push(['ElevenLabs', 'API key is not set. Voice output will not work until it is configured.']);
+    if(ai && ai.voice_provider === 'kokoro' && !ai.kokoro_installed) issues.push(['Kokoro', 'The local kokoro package is not installed in the backend Python environment.']);
     if(hardwareError) issues.push(['Arduino', hardwareError]);
     else if(hardware && !hardware.mock && !hardware.connected){
       issues.push(['Arduino', hardware.error || 'Not connected. Check the cable and serial port.']);
@@ -915,16 +948,22 @@
         const result = await response.json();
         if(!response.ok) throw new Error(result.error || ('HTTP ' + response.status));
         const models = result.models.filter(model=>model[capability]);
+        const isCasual = task === 'casual';
         const isChat = task === 'chat';
-        const previousProvider = isChat ? config.chatProvider : config.recipeProvider;
-        let fallback = isChat ? result.chat_model : result.recipe_model;
+        const previousProvider = isCasual ? 'ollama' : isChat ? config.chatProvider : config.recipeProvider;
+        let fallback = isCasual ? result.casual_model : isChat ? result.chat_model : result.recipe_model;
         if(previousProvider !== result.provider && result.provider === 'omniroute'){
           const preferredNames = isChat ? ['Coda - conversation'] : ['Coda - Executer','Coda - Executor'];
           const preferred = models.find(model=>preferredNames.includes(model.id) || preferredNames.includes(model.name));
           if(preferred) fallback = preferred.id;
         }
         const chosen = fillOptions(select,models,previousProvider === result.provider ? selected : '',fallback);
-        if(isChat){
+        if(isCasual){
+          config.casualModel = chosen || result.casual_model;
+          if(config.casualModel !== result.casual_model){
+            await post('/ai/configure',{casual_model:config.casualModel});
+          }
+        }else if(isChat){
           config.chatModel = chosen;
           config.chatProvider = result.provider;
         }else{
@@ -934,13 +973,14 @@
         return 'Loaded ' + models.length + ' ' + result.provider + ' ' + task + ' models';
       };
       const outcomes = await Promise.allSettled([
+        loadTask('casual',document.getElementById('casualModelSelect'),config.casualModel,'supports_chat'),
         loadTask('chat',chatSelect,config.chatModel,'supports_chat'),
         loadTask('recipe',recipeSelect,config.recipeModel,'supports_recipe')
       ]);
       saveConfig(config);
       message.textContent = outcomes.map((outcome,index)=>outcome.status === 'fulfilled'
         ? outcome.value
-        : (index === 0 ? 'Chat' : 'Recipe') + ': ' + outcome.reason.message).join('. ');
+        : (['Ollama casual chat','Complex chat','Recipe'][index]) + ': ' + outcome.reason.message).join('. ');
     }catch(err){
       message.textContent = 'Could not load models: ' + err.message;
     }finally{
@@ -952,6 +992,17 @@
     config.chatModel = event.target.value;
     saveConfig(config);
     document.getElementById('modelsMsg').textContent = 'Chat model saved.';
+  });
+  document.getElementById('casualModelSelect').addEventListener('change', async event=>{
+    config.casualModel = event.target.value;
+    saveConfig(config);
+    document.getElementById('modelsMsg').textContent = 'Saving Ollama conversation model...';
+    try{
+      await post('/ai/configure',{casual_model:config.casualModel});
+      document.getElementById('modelsMsg').textContent = 'Casual conversation model saved.';
+    }catch(err){
+      document.getElementById('modelsMsg').textContent = err.message;
+    }
   });
   document.getElementById('recipeModelSelect').addEventListener('change', event=>{
     config.recipeModel = event.target.value;
@@ -990,6 +1041,10 @@
       if(ai && !document.getElementById('chatProviderSelect').dataset.initialized){
         document.getElementById('chatProviderSelect').value = ai.chat_provider || 'groq';
         document.getElementById('recipeProviderSelect').value = ai.recipe_provider || 'groq';
+        document.getElementById('voiceProviderSelect').value = ai.voice_provider || 'kokoro';
+        document.getElementById('kokoroVoiceSelect').value = ai.kokoro_voice || 'af_heart';
+        config.casualModel = ai.casual_model || 'qwen2.5:3b';
+        config.voiceProvider = ai.voice_provider || 'kokoro';
         document.getElementById('chatProviderSelect').dataset.initialized = 'true';
       }
       const responseError = (response,result,label)=>{
@@ -1006,6 +1061,7 @@
       const aiAvailable = Boolean(ai && aiResponse && aiResponse.ok);
       const values = [
         ['Backend', aiAvailable ? 'Online' : 'Error'],
+        ['Casual conversation', ai && ai.casual_model ? 'Ollama · ' + ai.casual_model : 'Unavailable'],
         ['Chat provider', ai && ai.chat_provider || 'Unavailable'],
         ['Recipe provider', ai && ai.recipe_provider || 'Unavailable'],
         ['Emergency stop', ai && ai.estop_latched ? 'LATCHED' : 'Clear'],
@@ -1017,6 +1073,8 @@
         ['Groq API key', ai && ai.groq_api_key_set ? 'Set in backend memory' : 'Not set'],
         ['OmniRoute API key', ai && ai.omniroute_api_key_set ? 'Set in backend app data' : 'Not set'],
         ['OmniRoute endpoint', ai && ai.omniroute_base_url || 'Unavailable'],
+        ['Voice model', !ai ? 'Unavailable' : ai.voice_provider === 'kokoro' ? 'Kokoro-82M · local' : 'ElevenLabs · ' + (ai.elevenlabs_model || 'Unavailable')],
+        ['Kokoro voice', ai && ai.kokoro_voice || 'Unavailable'],
         ['ElevenLabs model', ai && ai.elevenlabs_model || 'Unavailable'],
         ['ElevenLabs voice ID', ai && ai.elevenlabs_voice_id || 'Not set'],
         ['ElevenLabs API key', ai && ai.elevenlabs_api_key_set ? 'Set in backend memory' : 'Not set'],
@@ -1027,7 +1085,9 @@
         ['Pumps with no detected flow', flowStatus && flowStatus.no_flow_pumps ? flowStatus.no_flow_pumps.join(', ') || 'None' : 'Unavailable'],
         ['Configured flavors', String(enabledFlavorPumps().filter(p=>p.id !== PUMP_COUNT).length)],
         ['Voice input', window.isSecureContext && (window.SpeechRecognition || window.webkitSpeechRecognition) ? 'Available' : 'Requires a supported browser on localhost/HTTPS'],
-        ['Voice output', ai && ai.elevenlabs_api_key_set ? 'ElevenLabs ready' : 'ElevenLabs key required'],
+        ['Voice output', !ai ? 'Unavailable' : ai.voice_provider === 'kokoro'
+          ? ai.kokoro_installed ? 'Kokoro ready' : 'Kokoro package missing'
+          : ai.elevenlabs_api_key_set ? 'ElevenLabs ready' : 'ElevenLabs key required'],
         ['Full screen', document.fullscreenEnabled ? 'Available' : 'Unavailable'],
         ['Animation rate', fpsEl.textContent]
       ];
@@ -1055,20 +1115,19 @@
     const button = event.currentTarget;
     const message = document.getElementById('systemMsg');
     button.disabled = true;
-    message.textContent = 'Testing the selected chat provider and ElevenLabs voice output...';
+    message.textContent = 'Testing the selected local/cloud voice model...';
     try{
-      const reply = await streamElevenLabsVoice({
+      const reply = await streamVoiceResponse({
         prompt:'Say: This is a test of the kiosk voice.',
         pumps:enabledFlavorPumps(),
         personality:config.personality,
         memory:config.memory
       });
-      delete providerIssues.Groq;
-      delete providerIssues.ElevenLabs;
+      delete providerIssues[config.voiceProvider === 'elevenlabs' ? 'ElevenLabs' : 'Kokoro'];
       message.textContent = 'Voice test completed.';
       await refreshDiagnostics();
     }catch(err){
-      const provider = /ElevenLabs|audio playback|voice responses/i.test(err.message) ? 'ElevenLabs' : 'AI provider';
+      const provider = config.voiceProvider === 'elevenlabs' ? 'ElevenLabs' : 'Kokoro';
       providerIssues[provider] = err.message || 'Voice test failed.';
       message.textContent = err.message || 'Voice test failed.';
       await refreshDiagnostics();
@@ -1101,6 +1160,9 @@
       omniroute_api_key:omniInput.value.trim(),
       chat_provider:document.getElementById('chatProviderSelect').value,
       recipe_provider:document.getElementById('recipeProviderSelect').value,
+      casual_model:document.getElementById('casualModelSelect').value || config.casualModel || 'qwen2.5:3b',
+      voice_provider:document.getElementById('voiceProviderSelect').value,
+      kokoro_voice:document.getElementById('kokoroVoiceSelect').value,
       elevenlabs_api_key:elevenInput.value.trim(),
       elevenlabs_voice_id:voiceInput.value.trim()
     };
@@ -1108,6 +1170,9 @@
     message.textContent = 'Saving provider settings to the local backend...';
     try{
       await post('/ai/configure',settings);
+      config.voiceProvider = settings.voice_provider;
+      config.casualModel = settings.casual_model;
+      saveConfig(config);
       if(settings.groq_api_key) delete providerIssues.Groq;
       if(settings.omniroute_api_key) delete providerIssues.OmniRoute;
       if(settings.elevenlabs_api_key) delete providerIssues.ElevenLabs;
@@ -1125,17 +1190,23 @@
     const message = document.getElementById('systemMsg');
     button.disabled = true;
     try{
-      await post('/ai/configure',{clear:true});
-      delete providerIssues.Groq;
+      const defaults = await post('/ai/configure',{clear:true});
+      delete providerIssues[config.recipeProvider === 'omniroute' ? 'OmniRoute' : 'Groq'];
       delete providerIssues.OmniRoute;
       delete providerIssues.ElevenLabs;
-      document.getElementById('chatProviderSelect').value = 'groq';
-      document.getElementById('recipeProviderSelect').value = 'groq';
+      document.getElementById('chatProviderSelect').value = defaults.chat_provider || 'groq';
+      document.getElementById('recipeProviderSelect').value = defaults.recipe_provider || 'groq';
+      document.getElementById('voiceProviderSelect').value = defaults.voice_provider || 'kokoro';
+      document.getElementById('kokoroVoiceSelect').value = defaults.kokoro_voice || 'af_heart';
+      config.casualModel = defaults.casual_model || 'qwen2.5:3b';
+      config.voiceProvider = defaults.voice_provider || 'kokoro';
+      document.getElementById('casualModelSelect').value = config.casualModel;
+      saveConfig(config);
       document.getElementById('groqKeyInput').value = '';
       document.getElementById('omnirouteKeyInput').value = '';
       document.getElementById('elevenKeyInput').value = '';
       document.getElementById('elevenVoiceId').value = '';
-      message.textContent = 'Provider keys cleared and chat/recipe providers reset to Groq.';
+      message.textContent = 'Provider keys cleared; complex requests and recipes reset to Groq, with local Ollama and Kokoro defaults restored.';
       await refreshModelCatalog();
       await refreshDiagnostics();
     }catch(err){ message.textContent = err.message; }
@@ -1221,7 +1292,7 @@
           refreshDiagnostics();
           noteActivity();
           drinkInput.value = prompt;
-          generateDrink(prompt, true);
+          generateDrink(prompt);
         }
       }
     };
@@ -1232,6 +1303,7 @@
   let pendingRecipe = null;
   let pendingPrompt = '';
   let isGenerating = false;
+  let casualConversation = [];
   let isPouring = false;
   let autoPourTimer = null;
   let elevenAudioContext = null;
@@ -1257,7 +1329,7 @@
     if(elevenAudioContext.state === 'suspended') elevenAudioContext.resume().catch(()=>{});
   }
 
-  async function streamElevenLabsVoice({prompt, pumps, personality, recipe, memory}){
+  async function streamVoiceResponse({prompt, pumps, personality, recipe, memory, say, history=[]}){
     stopVoicePlayback();
     const playbackId = voicePlaybackId;
     unlockElevenAudio();
@@ -1269,7 +1341,7 @@
     try{
       response = await fetch(BACKEND_URL + '/ai/voice-stream', {
         method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({prompt,pumps,personality,recipe,memory,chat_model:config.chatModel,recipe_model:config.recipeModel})
+        body:JSON.stringify({prompt,pumps,personality,recipe,memory,say,history,chat_model:config.chatModel,recipe_model:config.recipeModel})
       });
     }catch(err){
       if(err.name === 'AbortError'){
@@ -1293,7 +1365,7 @@
     const decoder = new TextDecoder();
     const captionEvents = [];
     const bufferedChunks = [];
-    const prefetchAudio = config.captionSyncMode === 'buffered3';
+    const prefetchAudio = config.captionSyncMode === 'buffered3' && config.voiceProvider !== 'kokoro';
     let lineBuffer = '';
     let playbackAt = prefetchAudio ? null : elevenAudioContext.currentTime + 0.04;
     let bufferedSeconds = 0;
@@ -1333,15 +1405,30 @@
       const textOffset = captionText.length;
       captionText += chunkText;
       allText += chunkText;
-      const words = /\S+/g;
-      let word;
-      while((word = words.exec(chunkText))){
-        const lastChar = word.index + word[0].length - 1;
-        const elapsed = Number(endTimes[lastChar]);
-        if(!Number.isFinite(elapsed)) continue;
-        const caption = captionText.slice(0,textOffset + lastChar + 1).trim().slice(-220);
-        captionEvents.push({at:startAt + elapsed,text:caption});
-        hadAlignment = true;
+      if(Array.isArray(alignment.words) && alignment.words.length){
+        let searchFrom = 0;
+        alignment.words.forEach(word=>{
+          const wordText = typeof word.text === 'string' ? word.text : '';
+          const wordStart = chunkText.indexOf(wordText,searchFrom);
+          const elapsed = Number(word.end_time_seconds);
+          if(wordStart < 0 || !Number.isFinite(elapsed)) return;
+          const wordEnd = wordStart + wordText.length - 1;
+          const caption = captionText.slice(0,textOffset + wordEnd + 1).trim().slice(-220);
+          captionEvents.push({at:startAt + elapsed,text:caption});
+          searchFrom = wordStart + wordText.length;
+          hadAlignment = true;
+        });
+      }else{
+        const words = /\S+/g;
+        let word;
+        while((word = words.exec(chunkText))){
+          const lastChar = word.index + word[0].length - 1;
+          const elapsed = Number(endTimes[lastChar]);
+          if(!Number.isFinite(elapsed)) continue;
+          const caption = captionText.slice(0,textOffset + lastChar + 1).trim().slice(-220);
+          captionEvents.push({at:startAt + elapsed,text:caption});
+          hadAlignment = true;
+        }
       }
       captionEvents.sort((left,right)=>left.at-right.at);
     };
@@ -1551,60 +1638,74 @@
       || /\b(?:i want|i'd like|i would like|i need)\b.{0,60}\b(?:drink|soda|beverage|recipe|something)\b/i.test(prompt);
   }
 
-  async function generateDrink(prompt, voiceRequest=false){
+  function rememberCasualTurn(prompt,reply){
+    if(!reply) return;
+    casualConversation.push({role:'user',content:prompt},{role:'assistant',content:reply});
+    casualConversation = casualConversation.slice(-8);
+  }
+
+  async function generateDrink(prompt){
     if(isGenerating) return;
     unlockElevenAudio();
     const pumps = enabledFlavorPumps();
     const canMakeRecipe = pumps.some(p=>p.id !== PUMP_COUNT);
-    const wantsRecipe = canMakeRecipe && isDrinkRequest(prompt);
+    const agentTask = !!(window.Omni && Omni.isAgentTask(prompt));
+    const agentDisabled = agentTask && !Omni.enabled();
+    const wantsRecipe = canMakeRecipe && isDrinkRequest(prompt) && !agentTask;
     isGenerating = true;
     generateBtn.disabled = true;
     talkBtn.disabled = true;
     setMode('thinking','THINKING');
     if(wantsRecipe){ showRecipeLoading(); reactToText(prompt); }
-    else{ frame.classList.remove('drink-mode'); reactToText(prompt); }
+    else{ if(!(agentTask && recipeOverlay.classList.contains('open'))) frame.classList.remove('drink-mode'); reactToText(prompt); }
     showSubtitle('');
-    let activeProvider = 'Groq';
+    let activeProvider = 'Ollama';
     try{
+      if(agentDisabled) throw new Error('Complex request assistant is disabled. Enable it from the AURA controls to use the reasoning model.');
       if(wantsRecipe){
+        activeProvider = config.recipeProvider === 'omniroute' ? 'OmniRoute' : 'Groq';
         const recipePumps = config.drinkOptions.sparkling === 'still' ? pumps.filter(p=>p.id !== PUMP_COUNT) : pumps;
         const result = await post('/ai/recipe', {
           prompt:recipePromptWithOptions(prompt), personality:config.personality, pumps:recipePumps, memory:config.memory,
           recipe_model:config.recipeModel
         });
-        delete providerIssues.Groq;
+        delete providerIssues[config.recipeProvider === 'omniroute' ? 'OmniRoute' : 'Groq'];
         showRecipe(result.recipe,prompt);
         reactToText(prompt + ' ' + result.recipe.reply);
         if(config.autoPour){
           startAutoPourCountdown(result.recipe,prompt);
         }else{
-          activeProvider = 'ElevenLabs';
+          activeProvider = config.voiceProvider === 'elevenlabs' ? 'ElevenLabs' : 'Kokoro';
           try{
-            await streamElevenLabsVoice({prompt, pumps, personality:config.personality, recipe:result.recipe, memory:config.memory});
-            delete providerIssues.ElevenLabs;
+            await streamVoiceResponse({prompt, pumps, personality:config.personality, recipe:result.recipe, memory:config.memory});
+            delete providerIssues[activeProvider];
           }catch(err){
-            providerIssues.ElevenLabs = err.message || 'Voice response failed.';
+            providerIssues[activeProvider] = err.message || 'Voice response failed.';
             showSubtitle('Recipe ready. Voice response failed: ' + err.message);
             await refreshDiagnostics();
           }
           setMode('idle','IDLE');
         }
       }
+      else if(agentTask){
+        activeProvider = config.chatProvider === 'omniroute' ? 'OmniRoute' : 'Groq';
+        setMode('thinking','WORKING');
+        const turn = await Omni.agentTurn(prompt);
+        delete providerIssues[activeProvider];
+        activeProvider = config.voiceProvider === 'elevenlabs' ? 'ElevenLabs' : 'Kokoro';
+        await streamVoiceResponse({prompt, pumps, personality:config.personality, memory:config.memory, say:turn.speech});
+        delete providerIssues[activeProvider];
+        reactToText(prompt + ' ' + turn.speech);
+        setMode('idle','IDLE');
+      }
       else{
-        if(voiceRequest){
-          const reply = await streamElevenLabsVoice({prompt, pumps, personality:config.personality, memory:config.memory});
-          delete providerIssues.Groq;
-          delete providerIssues.ElevenLabs;
-          reactToText(prompt + ' ' + reply);
-        }else{
-          const result = await post('/ai/chat', {
-            prompt, personality:config.personality, pumps, memory:config.memory,
-            chat_model:config.chatModel
-          });
-          delete providerIssues.Groq;
-          showSubtitle(result.reply);
-          reactToText(prompt + ' ' + result.reply);
-        }
+        activeProvider = 'Ollama + ' + (config.voiceProvider === 'elevenlabs' ? 'ElevenLabs' : 'Kokoro');
+        const reply = await streamVoiceResponse({
+          prompt, pumps, personality:config.personality, memory:config.memory, history:casualConversation
+        });
+        delete providerIssues[activeProvider];
+        rememberCasualTurn(prompt,reply);
+        reactToText(prompt + ' ' + reply);
         setMode('idle','IDLE');
       }
       await refreshDiagnostics();
@@ -1648,7 +1749,7 @@
       setMood('happy');
       showSubtitle('Pouring your drink.');
       try{
-        const reply = await streamElevenLabsVoice({
+        const reply = await streamVoiceResponse({
           prompt:automatic
             ? 'The user enabled automatic pouring and the drink is now pouring. Say a cheerful, brief acknowledgment.'
             : 'The user confirmed the drink and it is now pouring. Say a cheerful, brief acknowledgment.',
@@ -1932,7 +2033,15 @@
   document.getElementById('runSelfTest').addEventListener('click', runSelfTest);
   document.getElementById('stopSelfTest').addEventListener('click', stopEverything);
 
+  // used by omni.js (workspace dock / agent)
+  window.KioskAPI = {
+    personality: ()=>config.personality,
+    chatModel: ()=>config.chatModel,
+    ask: (text)=>{ if(!isGenerating) generateDrink(text); },
+    busy: ()=>isGenerating
+  };
 })();
 </script>
+<script src="/omni/omni.js"></script>
 </body>
 </html>

@@ -19,7 +19,15 @@ log() { echo "[$(date +%T)] $*" | tee -a "$RUN_LOG"; }
 
 is_termux() { [ -n "${TERMUX_VERSION:-}" ] || [[ "${PREFIX:-}" == *com.termux* ]]; }
 
-PY=python3; command -v python3 >/dev/null 2>&1 || PY=python
+if is_termux; then
+  PY=python3; command -v python3 >/dev/null 2>&1 || PY=python
+elif [ -x "$DIR/.venv/bin/python" ]; then
+  PY="$DIR/.venv/bin/python"
+elif [ -x "$DIR/venv/bin/python" ]; then
+  PY="$DIR/venv/bin/python"
+else
+  PY=python3; command -v python3 >/dev/null 2>&1 || PY=python
+fi
 
 if is_termux; then DEFAULT_MODE=mock; else DEFAULT_MODE=auto; fi
 MODE="${1:-${PUMP_TRANSPORT:-$DEFAULT_MODE}}"

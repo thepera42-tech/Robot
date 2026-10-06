@@ -1,0 +1,174 @@
+[13:10:07] Transport mode: serial
+[13:10:07] Backend started (PID 19657)
+[13:10:07] Waiting for the backend to respond...
+2026-10-06 13:10:08,143 [INFO] Loaded Groq API key from the portable application folder.
+2026-10-06 13:10:08,143 [INFO] Loaded ElevenLabs API key from the portable application folder.
+2026-10-06 13:10:08,153 [INFO] LCD display controller ready: /display
+2026-10-06 13:10:08,177 [INFO] Agent browser: engine=lite
+2026-10-06 13:10:08,178 [INFO] Starting pump backend on http://127.0.0.1:5005  (transport: serial)
+ * Serving Flask app 'backend'
+ * Debug mode: off
+2026-10-06 13:10:08,179 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2026-10-06 13:10:08,179 [INFO] [33mPress CTRL+C to quit[0m
+2026-10-06 13:10:08,993 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:08] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:09,999 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:09] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:10,163 [INFO] Arduino link up: Serial port /dev/ttyUSB0
+2026-10-06 13:10:10,164 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:10] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:10,164 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:10] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:10,164 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:10] "GET /hardware HTTP/1.1" 200 -
+[13:10:10] Backend is up.
+2026-10-06 13:10:10,177 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:10] "GET /hardware HTTP/1.1" 200 -
+  Arduino: CONNECTED  ->  Serial port /dev/ttyUSB0
+[13:10:10] Opening controller UI: http://localhost:5005/
+2026-10-06 13:10:10,500 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:10] "[36mGET / HTTP/1.1[0m" 304 -
+2026-10-06 13:10:10,595 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:10] "[36mGET /omni/omni.js HTTP/1.1[0m" 304 -
+2026-10-06 13:10:10,596 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:10] "[36mGET /omni/omni.css HTTP/1.1[0m" 304 -
+2026-10-06 13:10:10,598 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:10] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:10,645 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:10] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:10,717 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:10] "GET /system/volume HTTP/1.1" 200 -
+2026-10-06 13:10:11,013 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:11] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:12,026 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:12] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:12,163 [WARNING] display loop: no reply
+2026-10-06 13:10:13,034 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:13] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:13,727 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:13] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:14,048 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:14] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:14,554 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:14] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:14,643 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:14] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:15,059 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:15] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:15,290 [WARNING] display loop: no reply
+2026-10-06 13:10:16,072 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:16] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:16,104 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:16] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:16,107 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:16] "GET /status HTTP/1.1" 200 -
+2026-10-06 13:10:16,107 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:16] "GET /ai/status HTTP/1.1" 200 -
+2026-10-06 13:10:16,109 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:16] "GET /flow-status HTTP/1.1" 200 -
+2026-10-06 13:10:16,201 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:16] "GET /ai/models?task=casual HTTP/1.1" 200 -
+2026-10-06 13:10:17,056 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:17] "GET /ai/models?task=chat HTTP/1.1" 200 -
+2026-10-06 13:10:17,060 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:17] "GET /ai/models?task=recipe HTTP/1.1" 200 -
+2026-10-06 13:10:17,096 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:17] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:17,727 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:17] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:18,109 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:18] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:18,416 [WARNING] display loop: no reply
+2026-10-06 13:10:18,555 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:18] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:18,639 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:18] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:19,122 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:19] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:20,149 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:20] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:21,158 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:21] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:21,542 [WARNING] display loop: no reply
+2026-10-06 13:10:21,730 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:21] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:22,171 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:22] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:22,552 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:22] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:22,651 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:22] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:23,187 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:23] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:24,201 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:24] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:24,586 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:24] "[36mGET /display HTTP/1.1[0m" 304 -
+2026-10-06 13:10:24,668 [WARNING] display loop: no reply
+2026-10-06 13:10:24,677 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:24] "GET /display/api/config HTTP/1.1" 200 -
+2026-10-06 13:10:24,697 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:24] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:24,959 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:24] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:25,209 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:25] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:25,215 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:25] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:25,472 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:25] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:25,727 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:25] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:25,730 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:25] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:25,988 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:25] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:26,245 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:26] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:26,260 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:26] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:26,503 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:26] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:26,549 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:26] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:27,266 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:27] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:27,560 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:27] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:27,794 [WARNING] display loop: no reply
+2026-10-06 13:10:28,280 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:28] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:28,566 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:28] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:29,288 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:29] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:29,794 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:29] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:29,795 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:29] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:30,294 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:30] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:30,704 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:30] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:30,822 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:30] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:30,920 [WARNING] display loop: no reply
+2026-10-06 13:10:31,318 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:31] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:31,829 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:31] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:32,327 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:32] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:32,835 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:32] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:33,333 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:33] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:33,727 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:33] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:33,979 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:33] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:34,045 [WARNING] display loop: no reply
+2026-10-06 13:10:34,341 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:34] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:34,550 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:34] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:34,988 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:34] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:35,348 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:35] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:35,997 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:35] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:36,358 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:36] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:37,013 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:37] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:37,171 [WARNING] display loop: no reply
+2026-10-06 13:10:37,367 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:37] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:37,733 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:37] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:38,058 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:38] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:38,375 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:38] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:38,553 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:38] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:39,068 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:39] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:39,386 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:39] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:40,076 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:40] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:40,297 [WARNING] display loop: no reply
+2026-10-06 13:10:40,420 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:40] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:41,089 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:41] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:41,432 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:41] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:41,732 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:41] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:42,099 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:42] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:42,456 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:42] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:42,552 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:42] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:43,133 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:43] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:43,423 [WARNING] display loop: no reply
+2026-10-06 13:10:43,469 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:43] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:44,154 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:44] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:44,481 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:44] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:45,166 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:45] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:45,492 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:45] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:45,729 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:45] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:46,177 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:46] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:46,505 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:46] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:46,549 [WARNING] display loop: no reply
+2026-10-06 13:10:46,552 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:46] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:47,186 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:47] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:47,515 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:47] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:48,196 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:48] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:48,526 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:48] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:49,210 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:49] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:49,538 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:49] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:49,675 [WARNING] display loop: no reply
+2026-10-06 13:10:49,728 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:49] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:50,222 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:50] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:50,547 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:50] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:50,558 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:50] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:51,233 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:51] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:51,569 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:51] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:51,608 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:51] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:51,616 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:51] "GET /display/api/config HTTP/1.1" 200 -
+2026-10-06 13:10:52,253 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:52] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:52,601 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:52] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:52,801 [WARNING] display loop: no reply
+2026-10-06 13:10:53,263 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:53] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:53,612 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:53] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:53,730 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:53] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:54,274 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:54] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:54,554 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:54] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:54,622 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:54] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:55,286 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:55] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:55,629 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:55] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:55,927 [WARNING] display loop: no reply
+2026-10-06 13:10:56,302 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:56] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:56,638 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:56] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:57,314 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:57] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:57,651 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:57] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:57,734 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:57] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:58,324 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:58] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:58,554 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:58] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:10:58,662 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:58] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:59,053 [WARNING] display loop: no reply
+2026-10-06 13:10:59,336 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:59] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:10:59,672 [INFO] 127.0.0.1 - - [06/Oct/2026 13:10:59] "GET /display/api/frame HTTP/1.1" 200 -
+2026-10-06 13:11:00,349 [INFO] 127.0.0.1 - - [06/Oct/2026 13:11:00] "GET /display/api/frame HTTP/1.1" 200 -
+[13:11:00] Stopping backend...

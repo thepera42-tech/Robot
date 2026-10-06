@@ -1,0 +1,93 @@
+/* Omni workspace dock — lives inside #frame, so it can react to #frame.drink-mode (the split view). */
+
+#omniDock{
+  --d-bg:#0d1614; --d-line:#29423b; --d-text:#e9f0ed; --d-dim:#9aa9a3; --d-acc:#76c9bb;
+  position:absolute; z-index:9; display:flex; flex-direction:column; overflow:hidden;
+  background:var(--d-bg); border:1px solid var(--d-line); border-radius:8px; color:var(--d-text);
+  font-size:13px;
+  /* hidden state keeps layout alive so the music keeps playing and the AURA iframe keeps its state */
+  visibility:hidden; opacity:0; pointer-events:none; transform:translateY(8px);
+  transition:opacity .25s ease, transform .25s ease, visibility 0s linear .25s;
+  left:2vw; top:calc(4vh + min(25vw,250px) + 10px);
+  width:calc(100vw - min(470px,46vw) - 2vw - 18px);
+  bottom:100px;
+}
+/* split view: whenever a drink is being ordered, the dock sits under the shrunken face */
+#frame.drink-mode #omniDock,
+#omniDock.float{
+  visibility:visible; opacity:1; pointer-events:auto; transform:none;
+  transition:opacity .25s ease, transform .25s ease, visibility 0s;
+}
+/* opened by hand / by the AI outside of an order: big floating panel */
+#omniDock.float{ left:3vw; right:3vw; top:52px; bottom:100px; width:auto; z-index:12; box-shadow:0 18px 60px rgba(0,0,0,.65); }
+#frame.drink-mode #omniDock.float{ left:2vw; top:calc(4vh + min(25vw,250px) + 10px); right:auto;
+  width:calc(100vw - min(470px,46vw) - 2vw - 18px); bottom:100px; box-shadow:none; }
+#omniDock.max,#frame.drink-mode #omniDock.max{ left:0; top:0; right:0; bottom:0; width:auto; border-radius:0; z-index:40; }
+@media(max-width:600px){
+  #frame.drink-mode #omniDock:not(.float){ visibility:hidden; opacity:0; pointer-events:none; }
+  #omniDock.float,#frame.drink-mode #omniDock.float{ left:6px; right:6px; top:46px; bottom:90px; width:auto; }
+}
+
+.omniTabs{ display:flex; align-items:center; gap:4px; padding:6px; border-bottom:1px solid var(--d-line); background:#0a1210; flex:none; }
+.omniTabs button{ background:transparent; border:1px solid transparent; color:var(--d-dim); padding:6px 11px; border-radius:5px; font-size:12px; cursor:pointer; letter-spacing:.02em; }
+.omniTabs button:hover{ color:var(--d-text); background:#15221f; }
+.omniTabs button.active{ color:#0b1512; background:var(--d-acc); border-color:var(--d-acc); font-weight:600; }
+.omniTabs .omniSpacer{ flex:1; }
+.omniTabs .omniStatus{ color:var(--d-dim); font-size:11px; max-width:38%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.omniTabs .omniIcon{ padding:6px 9px; }
+
+.omniBody{ position:relative; flex:1; min-height:0; }
+.omniPane{ position:absolute; inset:0; visibility:hidden; overflow:auto; }
+.omniPane.active{ visibility:visible; }
+
+/* ---- workspace ---- */
+#omniAura{ position:absolute; inset:0; width:100%; height:100%; border:0; background:transparent; }
+#omniWorkHint{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:20px; text-align:center; color:var(--d-dim); pointer-events:none; }
+#omniWorkHint.hidden{ display:none; }
+#omniWorkHint strong{ color:var(--d-text); font-size:15px; }
+.omniChips{ display:flex; flex-wrap:wrap; gap:7px; justify-content:center; pointer-events:auto; }
+.omniChips button, .omniBtn{ background:#12201c; border:1px solid #365347; color:#b9d8cb; padding:7px 11px; border-radius:5px; font-size:12px; cursor:pointer; }
+.omniChips button:hover, .omniBtn:hover{ background:#1a2d28; color:#fff; }
+#omniWorkClear{ position:absolute; right:8px; top:8px; z-index:2; padding:4px 8px; font-size:11px; opacity:.8; }
+
+/* ---- music ---- */
+#omniMusic{ display:flex; flex-direction:column; gap:10px; padding:12px; }
+#omniYTBox{ position:relative; width:100%; aspect-ratio:16/9; max-height:46%; background:#000; border-radius:6px; overflow:hidden; flex:none; }
+#omniYTBox iframe,#omniYTBox #omniYT{ position:absolute; inset:0; width:100%; height:100%; }
+#omniTapPlay{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); color:#fff; font-size:15px; cursor:pointer; z-index:2; }
+#omniTapPlay.show{ display:flex; }
+#omniTrack{ font-size:14px; min-height:1.3em; }
+#omniTrack small{ color:var(--d-dim); }
+.omniRow{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.omniRow input[type=range]{ flex:1; min-width:120px; accent-color:var(--d-acc); height:28px; }
+.omniRow input[type=text]{ flex:1; min-width:120px; height:34px; background:#090a0a; border:1px solid var(--d-line); border-radius:5px; color:var(--d-text); padding:0 9px; font:inherit; }
+#omniVolLabel{ min-width:42px; text-align:right; font-variant-numeric:tabular-nums; color:var(--d-dim); }
+
+/* ---- browser ---- */
+#omniBrowser{ display:flex; flex-direction:column; overflow:hidden; }
+.omniBar{ display:flex; gap:6px; padding:8px; flex:none; border-bottom:1px solid var(--d-line); align-items:center; }
+.omniBar input{ flex:1; min-width:0; height:32px; background:#090a0a; border:1px solid var(--d-line); border-radius:5px; color:var(--d-text); padding:0 9px; font:inherit; }
+.omniBadge{ font-size:10px; letter-spacing:.06em; padding:3px 6px; border:1px solid var(--d-line); border-radius:4px; color:var(--d-dim); white-space:nowrap; }
+.omniBadge.full{ color:#8fe3c6; border-color:#3f7a66; }
+#omniView{ flex:1; min-height:0; overflow:auto; position:relative; }
+#omniShot{ display:block; width:100%; height:auto; cursor:pointer; background:#000; }
+#omniReader{ padding:12px 14px; line-height:1.45; }
+#omniReader h3{ margin:0 0 4px; font-size:15px; }
+#omniReader .u{ color:var(--d-dim); font-size:11px; word-break:break-all; margin-bottom:10px; }
+#omniReader .t{ white-space:pre-wrap; word-break:break-word; }
+#omniReader .links{ display:flex; flex-direction:column; gap:3px; margin-top:12px; }
+#omniReader .links button{ text-align:left; background:transparent; border:0; color:var(--d-acc); font-size:12px; padding:4px 0; cursor:pointer; }
+#omniReader .links button:hover{ text-decoration:underline; }
+.omniMsg{ padding:18px; color:var(--d-dim); }
+#omniFoot{ flex:none; border-top:1px solid var(--d-line); padding:6px 8px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:12px; color:var(--d-dim); }
+#omniFoot input{ flex:1; min-width:100px; height:30px; background:#090a0a; border:1px solid var(--d-line); border-radius:5px; color:var(--d-text); padding:0 8px; font:inherit; }
+#omniDls a{ color:var(--d-acc); margin-right:10px; }
+
+/* ---- now-playing pill + dock toggle, visible even when the dock is closed ---- */
+#omniNow{ position:absolute; z-index:6; top:36px; left:50%; transform:translateX(-50%); display:none; align-items:center; gap:7px;
+  background:rgba(8,18,15,.9); border:1px solid #29423b; border-radius:16px; padding:3px 6px 3px 12px; font-size:11px; color:#cfe3da; max-width:80%; }
+#omniNow.show{ display:flex; }
+#omniNow .n{ max-width:34vw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#omniNow button{ background:transparent; border:1px solid #365347; color:#b9d8cb; width:24px; height:24px; border-radius:12px; cursor:pointer; font-size:12px; line-height:1; }
+#omniToggle{ right:96px; }
+#frame.drink-mode #omniClose{display:none;}

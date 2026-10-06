@@ -1,0 +1,31 @@
+[13:33:01] Transport mode: serial
+[13:33:01] Backend started (PID 23222)
+[13:33:01] Waiting for the backend to respond...
+2026-10-06 13:33:01,491 [INFO] Loaded Groq API key from the portable application folder.
+2026-10-06 13:33:01,491 [INFO] Loaded ElevenLabs API key from the portable application folder.
+2026-10-06 13:33:01,505 [INFO] LCD display controller ready: /display
+2026-10-06 13:33:01,517 [WARNING] display loop: could not open /dev/ttyUSB0: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+2026-10-06 13:33:01,527 [INFO] Agent browser: engine=lite
+2026-10-06 13:33:01,529 [INFO] Starting pump backend on http://127.0.0.1:5005  (transport: serial)
+ * Serving Flask app 'backend'
+ * Debug mode: off
+2026-10-06 13:33:01,533 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2026-10-06 13:33:01,533 [INFO] [33mPress CTRL+C to quit[0m
+2026-10-06 13:33:01,855 [WARNING] Arduino not available (serial): could not open /dev/ttyUSB0: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+2026-10-06 13:33:01,855 [INFO] 127.0.0.1 - - [06/Oct/2026 13:33:01] "GET /hardware HTTP/1.1" 200 -
+[13:33:01] Backend is up.
+2026-10-06 13:33:01,875 [INFO] 127.0.0.1 - - [06/Oct/2026 13:33:01] "GET /hardware HTTP/1.1" 200 -
+  Arduino: NOT FOUND  ->  could not open /dev/ttyUSB0: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+[13:33:01] Opening controller UI: http://localhost:5005/
+2026-10-06 13:33:02,012 [INFO] 127.0.0.1 - - [06/Oct/2026 13:33:02] "[36mGET / HTTP/1.1[0m" 304 -
+2026-10-06 13:33:02,036 [INFO] 127.0.0.1 - - [06/Oct/2026 13:33:02] "[36mGET /omni/omni.css HTTP/1.1[0m" 304 -
+2026-10-06 13:33:02,037 [INFO] 127.0.0.1 - - [06/Oct/2026 13:33:02] "[36mGET /omni/omni.js HTTP/1.1[0m" 304 -
+2026-10-06 13:33:02,088 [INFO] 127.0.0.1 - - [06/Oct/2026 13:33:02] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:33:02,094 [INFO] 127.0.0.1 - - [06/Oct/2026 13:33:02] "GET /system/volume HTTP/1.1" 200 -
+2026-10-06 13:33:02,653 [WARNING] display loop: could not open /dev/ttyUSB0: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+2026-10-06 13:33:03,250 [INFO] 127.0.0.1 - - [06/Oct/2026 13:33:03] "GET /hardware HTTP/1.1" 200 -
+2026-10-06 13:33:03,784 [WARNING] display loop: could not open /dev/ttyUSB0: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+2026-10-06 13:33:04,915 [WARNING] display loop: could not open /dev/ttyUSB0: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+2026-10-06 13:33:06,046 [WARNING] display loop: could not open /dev/ttyUSB0: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+[13:33:07] Stopping backend...

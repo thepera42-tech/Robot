@@ -1,0 +1,16 @@
+[12:25:47] Transport mode: mock
+[12:25:47] Backend started (PID 9333)
+[12:25:47] Waiting for the backend to respond...
+2026-10-06 12:25:48,480 [INFO] Loaded Groq API key from the portable application folder.
+2026-10-06 12:25:48,482 [INFO] Loaded ElevenLabs API key from the portable application folder.
+2026-10-06 12:25:48,562 [INFO] Simulated Arduino active — mimicking pump_controller.ino, no hardware required.
+2026-10-06 12:25:48,564 [INFO] Arduino link up: Simulated Arduino
+2026-10-06 12:25:48,562 [INFO] LCD display controller ready: /display
+2026-10-06 12:25:48,736 [INFO] Agent browser: engine=lite
+2026-10-06 12:25:48,741 [INFO] Starting pump backend on http://127.0.0.1:5005  (transport: mock)
+ * Serving Flask app 'backend'
+ * Debug mode: off
+Address already in use
+Port 5005 is in use by another program. Either identify and stop that program, or start the server with a different port.
+[12:27:19] The backend did not start. Last lines of the log:
+[12:27:19] Stopping backend...

@@ -1,0 +1,17 @@
+[12:36:04] Transport mode: auto
+[12:36:04] Backend started (PID 13550)
+[12:36:04] Waiting for the backend to respond...
+[12:36:04] Backend is up.
+  Arduino: SIMULATED (no hardware in use)
+[12:36:04] Opening controller UI: http://localhost:5005/
+2026-10-06 12:36:04,535 [INFO] Loaded Groq API key from the portable application folder.
+2026-10-06 12:36:04,535 [INFO] Loaded ElevenLabs API key from the portable application folder.
+2026-10-06 12:36:04,548 [INFO] LCD display controller ready: /display
+2026-10-06 12:36:04,561 [WARNING] display loop: could not open /dev/ttyUSB0: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+2026-10-06 12:36:04,574 [INFO] Agent browser: engine=lite
+2026-10-06 12:36:04,575 [INFO] Starting pump backend on http://127.0.0.1:5005  (transport: serial)
+ * Serving Flask app 'backend'
+ * Debug mode: off
+Address already in use
+Port 5005 is in use by another program. Either identify and stop that program, or start the server with a different port.
+[12:36:04] Stopping backend...

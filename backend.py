@@ -18,10 +18,14 @@ Install once (laptop):  pip install -r requirements.txt
 import os
 import sys
 import time
+import importlib.util
 import json
 import logging
+import re
+import subprocess
 import threading
 import queue
+import tempfile
 import urllib.error
 import urllib.request
 import ipaddress
@@ -80,6 +84,19 @@ AI_SETTINGS = {
     "chat_provider": "groq",
     "recipe_provider": "groq",
     "omniroute_api_key": "",
+    "casual_model": "qwen2.5:3b",
+    "voice_provider": "kokoro" if importlib.util.find_spec("kokoro") else "elevenlabs",
+    "kokoro_voice": "af_heart",
+}
+
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/")
+OLLAMA_KEEP_ALIVE = "15m"
+KOKORO_VOICES = {
+    "af_alloy", "af_aoede", "af_bella", "af_heart", "af_jessica", "af_kore",
+    "af_nicole", "af_nova", "af_river", "af_sarah", "af_sky", "am_adam",
+    "am_echo", "am_eric", "am_fenrir", "am_liam", "am_michael", "am_onyx",
+    "am_puck", "am_santa", "bf_alice", "bf_emma", "bf_isabella", "bf_lily",
+    "bm_daniel", "bm_fable", "bm_george", "bm_lewis",
 }
 
 
@@ -96,6 +113,15 @@ def _load_ai_settings():
     api_key = saved.get("omniroute_api_key")
     if isinstance(api_key, str):
         AI_SETTINGS["omniroute_api_key"] = api_key.strip()
+    casual_model = saved.get("casual_model")
+    if isinstance(casual_model, str) and 1 <= len(casual_model) <= 200:
+        AI_SETTINGS["casual_model"] = casual_model
+    voice_provider = saved.get("voice_provider")
+    if voice_provider in ("kokoro", "elevenlabs"):
+        AI_SETTINGS["voice_provider"] = voice_provider
+    kokoro_voice = saved.get("kokoro_voice")
+    if kokoro_voice in KOKORO_VOICES:
+        AI_SETTINGS["kokoro_voice"] = kokoro_voice
 
 
 def _save_ai_settings():
@@ -153,6 +179,13 @@ command_lock = threading.Lock()   # only one command on the wire at a time
 reply_queue = queue.Queue()       # OK / ERR lines, routed here by serial_reader
 
 DONE_GRACE_SECONDS = 2.0  # if a timed FIRE's DONE never shows up, force idle after this
+COMPLEX_REQUEST_RE = re.compile(
+    r"\b(code|program(?:ming)?|script|debug(?:ging)?|implement|algorithm|function|class|"
+    r"graph|plot|simulat\w*|circuit|equation|solve|derivative|integral|calculus|physics|"
+    r"math\w*|diagram|table|chart|search|browse|website|youtube|download|news|weather|"
+    r"research|analy[sz]\w*|summari[sz]\w*|compare|calculate|explain|write|build|create|generate|design)\b",
+    re.IGNORECASE,
+)
 
 pump_state = {
     i: {"active": False, "speed": 0, "total_seconds": 0.0,
@@ -590,6 +623,19 @@ def serial_reader(dev):
                 log.debug("ARDUINO: %s", line)
             reply_queue.put(line)
             continue
+        if line.startswith("OK PONG"):
+            # Newer controller firmware sends this heartbeat asynchronously.
+            # It is not the acknowledgement for the command currently in flight.
+            with state_lock:
+                safety_state["controller_connected"] = True
+            display.set_alert("controller")
+            log.debug("ARDUINO heartbeat: %s", line)
+            continue
+        if line.startswith(("@EVT ", "@REQ ", "@T ", "@HELLO ")):
+            # Firmware telemetry/events may arrive between a command and its
+            # OK/ERR reply; never let these unsolicited frames satisfy a command.
+            log.debug("ARDUINO async: %s", line)
+            continue
         if not (line == "OK" and display.is_sending()):
             log.info("ARDUINO: %s", line)
         if line.startswith("DONE"):
@@ -670,6 +716,19 @@ def serve_controller():
 @app.route("/test")
 def serve_test():
     return serve_page("test_mode.html")
+
+
+@app.route("/aura")
+def serve_aura():
+    """The full AURA console (also embedded in the kiosk's workspace dock as /aura?embed=1)."""
+    return serve_page("aura.html")
+
+
+@app.route("/omni/<name>")
+def serve_omni_asset(name):
+    if name not in ("omni.js", "omni.css"):
+        return "not found", 404
+    return serve_page(name)
 
 
 # ---------------- API ----------------
@@ -762,6 +821,351 @@ def _fetch_provider_models(provider, force_refresh=False):
         raise AIProviderError("%s did not return any active models." % label)
     cache.update(fetched_at=now, models=models)
     return list(models)
+
+
+def _fetch_ollama_models(force_refresh=False):
+    cache = _model_cache.setdefault("ollama", {"fetched_at": 0.0, "models": []})
+    now = time.monotonic()
+    if not force_refresh and now - cache["fetched_at"] < GROQ_MODEL_CACHE_SECONDS:
+        return list(cache["models"])
+    req = urllib.request.Request(OLLAMA_BASE_URL + "/api/tags", headers={"Accept": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=5) as response:
+            result = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        raise AIProviderError("Ollama model discovery failed (HTTP %s)." % exc.code)
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        log.warning("Ollama model discovery failed: %s", exc)
+        raise AIProviderError("Couldn't reach Ollama at %s. Start Ollama and try again." % OLLAMA_BASE_URL)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise AIProviderError("Ollama returned an unreadable model list.") from exc
+
+    if not isinstance(result, dict):
+        raise AIProviderError("Ollama returned an unreadable model list.")
+    models = []
+    for item in result.get("models", []):
+        if not isinstance(item, dict):
+            continue
+        model_id = item.get("name")
+        if isinstance(model_id, str) and model_id:
+            models.append({
+                "id": model_id,
+                "name": item.get("name") or model_id,
+                "active": True,
+                "supports_chat": True,
+                "supports_recipe": False,
+            })
+    if not models:
+        raise AIProviderError("Ollama is running but has no downloaded models. Pull a model and refresh.")
+    cache.update(fetched_at=now, models=models)
+    return list(models)
+
+
+def _ollama_chat(messages, model, temperature=0.9, max_tokens=512):
+    payload = {
+        "model": model,
+        "messages": messages,
+        "stream": False,
+        "keep_alive": OLLAMA_KEEP_ALIVE,
+        "options": {"temperature": temperature, "num_predict": max_tokens},
+    }
+    req = urllib.request.Request(
+        OLLAMA_BASE_URL + "/api/chat",
+        data=json.dumps(payload).encode("utf-8"),
+        method="POST",
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=120) as response:
+            result = json.loads(response.read().decode("utf-8"))
+        if not isinstance(result, dict):
+            raise AIProviderError("Ollama returned an unreadable response.")
+        message = result.get("message")
+        content = message.get("content") if isinstance(message, dict) else None
+        if not isinstance(content, str) or not content.strip():
+            raise AIProviderError("Ollama returned an empty or unreadable response.")
+        return content.strip()
+    except urllib.error.HTTPError as exc:
+        body = exc.read(2048).decode("utf-8", "replace")
+        try:
+            error_body = json.loads(body)
+            detail = error_body.get("error", "") if isinstance(error_body, dict) else ""
+        except ValueError:
+            detail = ""
+        if exc.code == 404:
+            raise AIProviderError("Ollama does not have model '%s'. Pull it in Ollama or select another model." % model)
+        raise AIProviderError("Ollama request failed (HTTP %s)%s" % (
+            exc.code, ": " + str(detail)[:240] if detail else "."
+        ))
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        log.warning("Ollama chat request failed: %s", exc)
+        raise AIProviderError("Couldn't reach Ollama at %s." % OLLAMA_BASE_URL)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise AIProviderError("Ollama returned an unreadable response.") from exc
+
+
+def _ollama_chat_stream(messages, model, temperature=0.9, max_tokens=512):
+    payload = {
+        "model": model,
+        "messages": messages,
+        "stream": True,
+        "keep_alive": OLLAMA_KEEP_ALIVE,
+        "options": {"temperature": temperature, "num_predict": max_tokens},
+    }
+    req = urllib.request.Request(
+        OLLAMA_BASE_URL + "/api/chat",
+        data=json.dumps(payload).encode("utf-8"),
+        method="POST",
+        headers={"Content-Type": "application/json", "Accept": "application/x-ndjson"},
+    )
+    received_text = False
+    try:
+        with urllib.request.urlopen(req, timeout=120) as response:
+            for raw_line in response:
+                if not raw_line.strip():
+                    continue
+                try:
+                    event = json.loads(raw_line.decode("utf-8"))
+                except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                    raise AIProviderError("Ollama returned an unreadable streamed response.") from exc
+                if event.get("error"):
+                    raise AIProviderError("Ollama request failed: %s" % str(event["error"])[:240])
+                message = event.get("message")
+                content = message.get("content") if isinstance(message, dict) else None
+                if isinstance(content, str) and content:
+                    received_text = True
+                    yield content
+        if not received_text:
+            raise AIProviderError("Ollama returned an empty or unreadable response.")
+    except urllib.error.HTTPError as exc:
+        body = exc.read(2048).decode("utf-8", "replace")
+        try:
+            error_body = json.loads(body)
+            detail = error_body.get("error", "") if isinstance(error_body, dict) else ""
+        except ValueError:
+            detail = ""
+        if exc.code == 404:
+            raise AIProviderError("Ollama does not have model '%s'. Pull it in Ollama or select another model." % model)
+        raise AIProviderError("Ollama request failed (HTTP %s)%s" % (
+            exc.code, ": " + str(detail)[:240] if detail else "."
+        ))
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        log.warning("Ollama streamed chat request failed: %s", exc)
+        raise AIProviderError("Couldn't reach Ollama at %s." % OLLAMA_BASE_URL)
+
+
+def _approximate_voice_alignment(text, duration):
+    characters = list(text)
+    weights = [
+        0.25 if character.isspace() else 1.5 if character in ".,!?;:" else 1.0
+        for character in characters
+    ]
+    total_weight = sum(weights) or 1
+    elapsed = 0.0
+    end_times = []
+    for weight in weights:
+        elapsed += duration * weight / total_weight
+        end_times.append(elapsed)
+    if end_times:
+        end_times[-1] = duration
+    return {
+        "characters": characters,
+        "character_end_times_seconds": end_times,
+    }
+
+
+def _kokoro_stream_audio_chunks(text_chunks=None, messages=None, model=None, temperature=0.8, max_tokens=256):
+    def events():
+        output_queue = queue.Queue()
+        speech_queue = queue.Queue()
+        cancelled = threading.Event()
+        worker_process = []
+
+        def produce_text():
+            try:
+                chunks = text_chunks if text_chunks is not None else _ollama_chat_stream(
+                    messages, model, temperature=temperature, max_tokens=max_tokens
+                )
+                reply = "".join(chunks).strip()
+                if not reply:
+                    raise AIProviderError("Ollama returned an empty or unreadable response.")
+                if not cancelled.is_set():
+                    speech_queue.put(reply)
+            except AIProviderError as exc:
+                output_queue.put(("error", str(exc)))
+                cancelled.set()
+            except Exception:
+                log.exception("Unexpected error while preparing streamed voice text.")
+                output_queue.put(("error", "The local conversation stream failed unexpectedly."))
+                cancelled.set()
+            finally:
+                speech_queue.put(None)
+                output_queue.put(("text_done", None))
+        def synthesize():
+            process = None
+            error_output = tempfile.TemporaryFile(mode="w+b")
+            error_output = tempfile.TemporaryFile(mode="w+b")
+            try:
+                worker = os.path.join(BASE_DIR, "kokoro_worker.py")
+                try:
+                    process = subprocess.Popen(
+                        [sys.executable, worker, AI_SETTINGS["kokoro_voice"]],
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=error_output,
+                        text=True,
+                        encoding="utf-8",
+                        bufsize=1,
+                    )
+                except OSError as exc:
+                    raise AIProviderError("Could not start the Kokoro worker: %s" % str(exc)[:200]) from exc
+                worker_process.append(process)
+                timed_out = threading.Event()
+
+                def terminate_worker():
+                    timed_out.set()
+                    try:
+                        process.terminate()
+                    except OSError:
+                        pass
+
+                timer = threading.Timer(180, terminate_worker)
+                timer.daemon = True
+                timer.start()
+                try:
+                    process.stdin.write(json.dumps({"warmup": True}) + "\n")
+                    process.stdin.flush()
+                    warmup_line = process.stdout.readline()
+                finally:
+                    timer.cancel()
+                if not warmup_line:
+                    process.wait()
+                    if timed_out.is_set():
+                        reason = "worker timed out while loading the voice model"
+                    else:
+                        error_output.seek(0)
+                        detail = error_output.read(2048).decode("utf-8", "replace").strip().splitlines()
+                        reason = detail[-1][:200] if detail else "worker exited with code %s" % process.returncode
+                    raise AIProviderError("Kokoro could not start speech synthesis: %s" % reason)
+                try:
+                    warmup_result = json.loads(warmup_line)
+                except json.JSONDecodeError as exc:
+                    raise AIProviderError("Kokoro returned an unreadable warmup response.") from exc
+                if warmup_result.get("error") or not warmup_result.get("ready"):
+                    raise AIProviderError("Kokoro could not load the voice model: %s" % (
+                        str(warmup_result.get("error") or "worker did not report ready")[:240]
+                    ))
+                reply = speech_queue.get()
+                if reply is None or cancelled.is_set():
+                    return
+                timed_out = threading.Event()
+
+                def terminate_worker():
+                    timed_out.set()
+                    try:
+                        process.terminate()
+                    except OSError:
+                        pass
+
+                timer = threading.Timer(180, terminate_worker)
+                timer.daemon = True
+                timer.start()
+                try:
+                    process.stdin.write(json.dumps({"text": reply}) + "\n")
+                    process.stdin.flush()
+                    line = process.stdout.readline()
+                finally:
+                    timer.cancel()
+                if not line:
+                    process.wait()
+                    error_output.seek(0)
+                    detail = error_output.read(2048).decode("utf-8", "replace").strip().splitlines()
+                    reason = detail[-1][:200] if detail else "worker exited with code %s" % process.returncode
+                    if timed_out.is_set():
+                        reason = "worker timed out after 180 seconds"
+                    elif process.returncode is not None and process.returncode < 0:
+                        reason = "worker was terminated, possibly because of system memory pressure"
+                    raise AIProviderError("Kokoro could not synthesize this reply: %s" % reason)
+                try:
+                    result = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    raise AIProviderError("Kokoro returned an unreadable audio response.") from exc
+                if result.get("error"):
+                    raise AIProviderError("Kokoro could not synthesize this reply: %s" % str(result["error"])[:240])
+                audio = result.get("audio_base64")
+                sample_count = result.get("sample_count")
+                if not audio or not isinstance(sample_count, int) or sample_count <= 0:
+                    raise AIProviderError("Kokoro returned no audio for the reply.")
+                alignment = {"characters": list(reply)}
+                word_timings = result.get("word_timings")
+                if isinstance(word_timings, list) and word_timings:
+                    alignment["words"] = [
+                        word for word in word_timings
+                        if isinstance(word, dict)
+                        and isinstance(word.get("text"), str)
+                        and isinstance(word.get("end_time_seconds"), (int, float))
+                    ]
+                else:
+                    alignment.update(_approximate_voice_alignment(reply, sample_count / 24000.0))
+                output_queue.put(("audio", {
+                    "audio_base64": audio,
+                    "alignment": alignment,
+                }))
+            except AIProviderError as exc:
+                log.error("Kokoro streaming failed: %s", exc)
+                output_queue.put(("error", str(exc)))
+                cancelled.set()
+            except Exception:
+                log.exception("Unexpected error in the Kokoro streaming worker.")
+                output_queue.put(("error", "Kokoro voice synthesis failed unexpectedly."))
+                cancelled.set()
+            finally:
+                if process is not None:
+                    try:
+                        if process.stdin:
+                            process.stdin.close()
+                        process.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        process.terminate()
+                        process.wait(timeout=5)
+                    except OSError:
+                        pass
+                error_output.close()
+                output_queue.put(("audio_done", None))
+
+        text_thread = threading.Thread(target=produce_text, daemon=True)
+        audio_thread = threading.Thread(target=synthesize, daemon=True)
+        text_thread.start()
+        audio_thread.start()
+        text_done = False
+        audio_done = False
+        try:
+            while not (text_done and audio_done):
+                try:
+                    event_type, event_data = output_queue.get(timeout=0.2)
+                except queue.Empty:
+                    continue
+                if event_type == "audio":
+                    yield event_data
+                elif event_type == "error":
+                    yield {"error": event_data}
+                    cancelled.set()
+                    for process in worker_process:
+                        if process.poll() is None:
+                            process.terminate()
+                    break
+                elif event_type == "text_done":
+                    text_done = True
+                elif event_type == "audio_done":
+                    audio_done = True
+        finally:
+            cancelled.set()
+            speech_queue.put(None)
+            for process in worker_process:
+                if process.poll() is None:
+                    process.terminate()
+
+    return events()
 
 
 def _select_provider_model(provider, requested, fallback, capability):
@@ -1075,7 +1479,8 @@ def _groq_voice_messages(prompt, personality, recipe=None, available=None, memor
         "You are Coda, a playful, upbeat soda-machine host with a warm, clever, slightly mischievous personality. "
         "Always respond to exactly what the user said. If their message is only a greeting or small talk, greet them back "
         "and chat naturally. Do not pitch drinks, list flavors, suggest recipes, or steer them toward ordering unless they ask. "
-        "Do not sound like a generic support bot. Never claim anything was poured. "
+        "Do not sound like a generic support bot. Keep casual replies to one or two complete, natural sentences; never use sentence fragments. "
+        "Never claim anything was poured. "
         "Use only configured flavor names; pump 9 is optional sparkling water, not a flavor. "
         "Do not claim exact density or volume without calibrated measurements."
     )
@@ -1099,6 +1504,19 @@ def _groq_voice_messages(prompt, personality, recipe=None, available=None, memor
     return [
         {"role": "system", "content": system_instruction},
         {"role": "user", "content": json.dumps(context)},
+    ]
+
+
+def _casual_history(raw_history, max_messages=8, max_chars=1500):
+    if not isinstance(raw_history, list):
+        return []
+    return [
+        {"role": item["role"], "content": item["content"][:max_chars]}
+        for item in raw_history[-max_messages:]
+        if isinstance(item, dict)
+        and item.get("role") in ("user", "assistant")
+        and isinstance(item.get("content"), str)
+        and item["content"].strip()
     ]
 
 
@@ -1161,8 +1579,19 @@ def ai_validate_recipe():
 @app.route("/ai/models", methods=["GET"])
 def ai_models():
     task = request.args.get("task", "chat").strip().lower()
+    if task == "casual":
+        try:
+            models = _fetch_ollama_models(force_refresh=request.args.get("refresh") == "1")
+            return jsonify({
+                "models": models,
+                "provider": "ollama",
+                "casual_model": AI_SETTINGS["casual_model"],
+                "cached_seconds": GROQ_MODEL_CACHE_SECONDS,
+            })
+        except AIProviderError as exc:
+            return jsonify({"error": str(exc)}), 502
     if task not in ("chat", "recipe"):
-        return jsonify({"error": "Choose chat or recipe models."}), 400
+        return jsonify({"error": "Choose casual, chat, or recipe models."}), 400
     provider = AI_SETTINGS[task + "_provider"]
     try:
         models = _fetch_provider_models(provider, force_refresh=request.args.get("refresh") == "1")
@@ -1190,6 +1619,8 @@ def ai_status():
         "estop_latched": safety_state["estop_latched"],
         "controller_connected": None if resolved_transport() == "mock" else safety_state["controller_connected"],
         "last_controller_event": safety_state["last_event"],
+        "casual_provider": "ollama",
+        "casual_model": AI_SETTINGS["casual_model"],
         "chat_provider": AI_SETTINGS["chat_provider"],
         "recipe_provider": AI_SETTINGS["recipe_provider"],
         "groq_recipe_model": GROQ_RECIPE_MODEL,
@@ -1199,6 +1630,9 @@ def ai_status():
         "omniroute_api_key_set": bool(AI_SETTINGS["omniroute_api_key"]),
         "omniroute_base_url": OMNIROUTE_BASE_URL,
         "elevenlabs_model": ELEVENLABS_TTS_MODEL,
+        "voice_provider": AI_SETTINGS["voice_provider"],
+        "kokoro_voice": AI_SETTINGS["kokoro_voice"],
+        "kokoro_installed": importlib.util.find_spec("kokoro") is not None,
         "elevenlabs_voice_id": os.environ.get("ELEVENLABS_VOICE_ID", ELEVENLABS_VOICE_ID),
         "elevenlabs_api_key_set": bool(os.environ.get("ELEVENLABS_API_KEY", "").strip()),
     })
@@ -1214,13 +1648,34 @@ def ai_configure():
         return jsonify({"error": "Key changes must come from this kiosk."}), 403
 
     data = request.get_json(force=True)
+    casual_model = str(data.get("casual_model", AI_SETTINGS["casual_model"])).strip()
+    if not casual_model or len(casual_model) > 200 or not re.fullmatch(r"[A-Za-z0-9._:/-]+", casual_model):
+        return jsonify({"error": "Choose a valid Ollama model name."}), 400
+    voice_provider = str(data.get("voice_provider", AI_SETTINGS["voice_provider"])).strip().lower()
+    if voice_provider not in ("kokoro", "elevenlabs"):
+        return jsonify({"error": "Choose Kokoro or ElevenLabs for voice output."}), 400
+    kokoro_voice = str(data.get("kokoro_voice", AI_SETTINGS["kokoro_voice"])).strip()
+    if kokoro_voice not in KOKORO_VOICES:
+        return jsonify({"error": "Choose a supported Kokoro voice."}), 400
     if data.get("clear") is True:
         os.environ.pop("GROQ_API_KEY", None)
         os.environ.pop("ELEVENLABS_API_KEY", None)
         os.environ.pop("ELEVENLABS_VOICE_ID", None)
-        AI_SETTINGS.update(chat_provider="groq", recipe_provider="groq", omniroute_api_key="")
+        AI_SETTINGS.update(
+            chat_provider="groq", recipe_provider="groq", omniroute_api_key="",
+            casual_model="qwen2.5:3b",
+            voice_provider="kokoro" if importlib.util.find_spec("kokoro") else "elevenlabs",
+            kokoro_voice="af_heart",
+        )
         _save_ai_settings()
-        return jsonify({"configured": False})
+        return jsonify({
+            "configured": False,
+            "chat_provider": AI_SETTINGS["chat_provider"],
+            "recipe_provider": AI_SETTINGS["recipe_provider"],
+            "casual_model": AI_SETTINGS["casual_model"],
+            "voice_provider": AI_SETTINGS["voice_provider"],
+            "kokoro_voice": AI_SETTINGS["kokoro_voice"],
+        })
     for field, variable, label in (
         ("groq_api_key", "GROQ_API_KEY", "Groq"),
         ("elevenlabs_api_key", "ELEVENLABS_API_KEY", "ElevenLabs"),
@@ -1245,8 +1700,10 @@ def ai_configure():
             if provider not in ("groq", "omniroute"):
                 return jsonify({"error": "Choose Groq or OmniRoute for %s." % task}), 400
             AI_SETTINGS[field] = provider
-    if omniroute_key or "chat_provider" in data or "recipe_provider" in data:
-        _save_ai_settings()
+    AI_SETTINGS["casual_model"] = casual_model
+    AI_SETTINGS["voice_provider"] = voice_provider
+    AI_SETTINGS["kokoro_voice"] = kokoro_voice
+    _save_ai_settings()
     voice_id = str(data.get("elevenlabs_voice_id", "")).strip()
     if voice_id:
         if len(voice_id) > 128:
@@ -1261,13 +1718,15 @@ def ai_chat():
     prompt = str(data.get("prompt", "")).strip()
     if not prompt or len(prompt) > 500:
         return jsonify({"error": "Enter a message up to 500 characters."}), 400
+    if COMPLEX_REQUEST_RE.search(prompt):
+        return jsonify({"error": "This needs the configured complex-request assistant, not the casual local model."}), 409
     try:
         available = _available_pumps(data.get("pumps", []))
-        provider = AI_SETTINGS["chat_provider"]
-        chat_model = _select_provider_model(provider, data.get("chat_model"), GROQ_CHAT_MODEL, "supports_chat")
-        reply = _request_groq_chat(
-            prompt, data.get("personality", ""), available, data.get("memory", ""), chat_model, provider
+        messages = _groq_voice_messages(
+            prompt, data.get("personality", ""), available=available, memory=data.get("memory", "")
         )
+        messages[1:1] = _casual_history(data.get("history"), max_messages=4, max_chars=500)
+        reply = _ollama_chat(messages, AI_SETTINGS["casual_model"], temperature=0.9, max_tokens=96)
         return jsonify({"reply": reply})
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
@@ -1281,22 +1740,46 @@ def ai_voice_stream():
     prompt = str(data.get("prompt", "")).strip()
     if not prompt or len(prompt) > 500:
         return jsonify({"error": "Enter a voice request up to 500 characters."}), 400
+    recipe_data = data.get("recipe")
+    say = str(data.get("say", "")).strip()
+    if not say and recipe_data is None and COMPLEX_REQUEST_RE.search(prompt):
+        return jsonify({"error": "This needs the configured complex-request assistant, not the casual local model."}), 409
     try:
         available = _available_pumps(data.get("pumps", []))
-        recipe_data = data.get("recipe")
+        recipe = None
         if recipe_data is None:
             messages = _groq_voice_messages(
                 prompt, data.get("personality", ""), available=available,
                 memory=data.get("memory", "")
             )
+            messages[1:1] = _casual_history(data.get("history"), max_messages=4, max_chars=500)
         else:
             recipe = _validate_recipe(recipe_data, available)
             messages = _groq_voice_messages(
                 prompt, "", recipe=recipe, memory=data.get("memory", "")
             )
-        provider = AI_SETTINGS["chat_provider"]
-        chat_model = _select_provider_model(provider, data.get("chat_model"), GROQ_CHAT_MODEL, "supports_chat")
-        spoken_text = _groq_completion(messages, model=chat_model, temperature=0.8, max_tokens=512, provider=provider)
+        say = say[:700]      # agent replies arrive pre-written
+        if AI_SETTINGS["voice_provider"] == "kokoro":
+            if say:
+                audio_chunks = _kokoro_stream_audio_chunks(text_chunks=[say])
+            elif recipe is not None:
+                audio_chunks = _kokoro_stream_audio_chunks(
+                    text_chunks=[recipe["reply"] or "Your drink is ready to review."]
+                )
+            else:
+                audio_chunks = _kokoro_stream_audio_chunks(
+                    messages=messages,
+                    model=AI_SETTINGS["casual_model"],
+                    temperature=0.8,
+                    max_tokens=96,
+                )
+            return _sse_audio_response(audio_chunks)
+        if say:
+            spoken_text = say
+        elif recipe is not None:
+            spoken_text = recipe["reply"] or "Your drink is ready to review."
+        else:
+            spoken_text = _ollama_chat(messages, AI_SETTINGS["casual_model"], temperature=0.8, max_tokens=96)
         audio_chunks = _elevenlabs_stream_with_timestamps(spoken_text)
         return _sse_audio_response(audio_chunks)
     except ValueError as exc:
@@ -1532,6 +2015,13 @@ def hardware():
 
 
 display.init(app, send_command, live_status, state_lock, BASE_DIR, log)
+
+import agent  # noqa: E402  (needs the helpers defined above)
+agent.init(app, {
+    "log": log, "ai_settings": AI_SETTINGS, "provider_details": _provider_details,
+    "provider_open": _provider_open, "select_model": _select_provider_model,
+    "default_model": GROQ_CHAT_MODEL, "AIProviderError": AIProviderError,
+})
 
 
 if __name__ == "__main__":

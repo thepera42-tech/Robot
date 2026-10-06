@@ -17,6 +17,15 @@ echo Starting pump backend (transport: %MODE%) ...
 echo Opening http://localhost:%PUMP_PORT%/ in a few seconds. Close this window (or Ctrl+C) to stop.
 start "" /b cmd /c "timeout /t 4 >nul & start http://localhost:%PUMP_PORT%/"
 
+if exist ".venv\Scripts\python.exe" (
+  ".venv\Scripts\python.exe" backend.py
+  goto :eof
+)
+if exist "venv\Scripts\python.exe" (
+  "venv\Scripts\python.exe" backend.py
+  goto :eof
+)
+
 where python >nul 2>nul
 if %errorlevel%==0 (
   python backend.py

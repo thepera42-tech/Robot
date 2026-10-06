@@ -1,0 +1,9 @@
+[12:15:30] Transport mode: auto
+[12:15:30] Backend started (PID 3679)
+[12:15:30] Waiting for the backend to respond...
+Traceback (most recent call last):
+  File "/home/abdul/Desktop/Robot-main/backend.py", line 31, in <module>
+    from flask import Flask, Response, request, jsonify, send_from_directory, stream_with_context
+ModuleNotFoundError: No module named 'flask'
+[12:16:02] The backend did not start. Last lines of the log:
+[12:16:02] Stopping backend...
